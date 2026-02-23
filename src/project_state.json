@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 43,
+  "projectStateVersion": 45,
   "summary": "Family communication app with AI-powered question paper analysis, sentiment-based happiness meter, problem-solving tracking, family guidance with professional tone, permission management for children, fight/conflict resolution tracking, and weekly expense tracking with AI-powered analysis and recommendations",
   "architectural_notes": [
     "App requires real-time updates for location sharing and messaging",
@@ -18,7 +18,7 @@
     "Permission widget and parent/child role selection not visible or accessible in current deployment",
     "Role selection modal (parent/child options) not displaying on login in Version 6",
     "Home page/dashboard is empty or missing previously mentioned features in Version 18",
-    "Build/deployment errors are occurring in Draft Version 20"
+    "React minified error #185 occurring in deployed Version 21 (typically indicates hydration mismatch or invalid DOM nesting)"
   ],
   "isFixRequest": true,
   "generatedImages": [
@@ -771,6 +771,22 @@
         "REQ-122"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-review-profilesetupmodal-and-chatwidget-components-for-improper-portal-usage-modal-rendering-or-floating-element-positioning-that-could-cause-dom-nesting-violations",
+      "title": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
+      "reqIds": [
+        "REQ-127"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-test-the-application-end-to-end-after-fixes-to-ensure-error-185-is-completely-resolved-and-no-new-react-errors-are-introduced",
+      "title": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
+      "reqIds": [
+        "REQ-129"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1324,6 +1340,46 @@
       "summary": "Fix any Motoko compilation errors in backend/main.mo that are preventing successful backend build",
       "reqIds": [
         "REQ-118"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-107",
+      "summary": "Investigate and resolve React minified error #185 in the deployed application, which typically indicates a hydration mismatch, invalid DOM nesting, or rendering inconsistency between server and client",
+      "reqIds": [
+        "REQ-123"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-108",
+      "summary": "Audit all frontend components for invalid DOM nesting issues, such as <div> inside <p>, <button> inside <button>, or other HTML elements violating nesting rules",
+      "reqIds": [
+        "REQ-124"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-109",
+      "summary": "Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for conditional rendering logic that may cause hydration mismatches between initial render and subsequent renders",
+      "reqIds": [
+        "REQ-125"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-110",
+      "summary": "Verify all React hooks (useState, useEffect, useQuery) in role-based widget rendering on Dashboard.tsx do not cause rendering conflicts or stale closure issues",
+      "reqIds": [
+        "REQ-126"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-112",
+      "summary": "Enable non-minified development build or add source maps to get the full React error message and stack trace for debugging error #185",
+      "reqIds": [
+        "REQ-128"
       ],
       "status": "pending"
     }

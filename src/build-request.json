@@ -1,136 +1,127 @@
 {
   "kind": "build_request",
-  "title": "Diagnose and fix deployment error preventing successful build",
-  "projectName": "FamilyConnect",
+  "title": "Fix React minified error #185 causing runtime failure",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-117",
-      "text": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "ERROR IS THERE",
-          "RECONSTRUCT"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Build logs are reviewed to identify the exact error message and stack trace",
-        "The root cause of the deployment failure is identified (backend compilation error, frontend build error, or deployment configuration issue)",
-        "Error is documented with specific file paths and line numbers if applicable"
-      ]
-    },
-    {
-      "id": "REQ-118",
-      "text": "Fix any Motoko compilation errors in backend/main.mo that are preventing successful backend build",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "ERROR IS THERE"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All Motoko syntax errors are resolved",
-        "Type mismatches and undefined variables are fixed",
-        "Backend compiles successfully without errors",
-        "All existing backend methods remain functional"
-      ]
-    },
-    {
-      "id": "REQ-119",
-      "text": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
+      "id": "REQ-123",
+      "text": "Investigate and resolve React minified error #185 in the deployed application, which typically indicates a hydration mismatch, invalid DOM nesting, or rendering inconsistency between server and client",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "ERROR IS THERE"
+          "Minified React error #185; visit https://react.dev/errors/185 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
         ]
       },
       "acceptanceCriteria": [
-        "All TypeScript type errors are resolved",
-        "Import statements and module paths are correct",
-        "React component syntax errors are fixed",
-        "Frontend builds successfully without errors",
-        "All existing components render without runtime errors"
+        "React error #185 no longer appears in browser console after deployment",
+        "Application loads and renders without runtime errors",
+        "All pages and components display correctly without hydration warnings"
       ]
     },
     {
-      "id": "REQ-120",
-      "text": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
+      "id": "REQ-124",
+      "text": "Audit all frontend components for invalid DOM nesting issues, such as <div> inside <p>, <button> inside <button>, or other HTML elements violating nesting rules",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
-        ],
-        "quotes": [
-          "ERROR IS THERE"
         ]
       },
       "acceptanceCriteria": [
-        "All mutation and query hooks correctly reference existing backend methods",
-        "No undefined method calls or incorrect parameter passing",
-        "Error boundaries handle failed queries gracefully",
-        "Query invalidation patterns are correct"
+        "All component JSX follows valid HTML nesting rules",
+        "No nested interactive elements (buttons inside buttons, links inside buttons)",
+        "Block-level elements are not nested inside inline elements"
       ]
     },
     {
-      "id": "REQ-121",
-      "text": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
+      "id": "REQ-125",
+      "text": "Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for conditional rendering logic that may cause hydration mismatches between initial render and subsequent renders",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
-        ],
-        "quotes": [
-          "ERROR IS THERE"
         ]
       },
       "acceptanceCriteria": [
-        "No circular import dependencies exist",
-        "All page components are imported correctly",
-        "Router configuration has valid paths and elements",
-        "AuthProvider and QueryClientProvider are properly configured"
+        "Conditional rendering based on authentication state uses consistent logic",
+        "No components render different content on client vs server hydration",
+        "Loading states are properly managed to prevent render mismatches"
       ]
     },
     {
-      "id": "REQ-122",
-      "text": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
-      "target": "both",
+      "id": "REQ-126",
+      "text": "Verify all React hooks (useState, useEffect, useQuery) in role-based widget rendering on Dashboard.tsx do not cause rendering conflicts or stale closure issues",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
-        ],
-        "quotes": [
-          "RECONSTRUCT"
         ]
       },
       "acceptanceCriteria": [
-        "Backend canister deploys successfully",
-        "Frontend builds and deploys without errors",
-        "Application is accessible at the deployment URL",
-        "All existing features remain functional after deployment",
-        "No console errors appear on initial page load"
+        "Dashboard role-based widget conditional rendering works without errors",
+        "React hooks have correct dependency arrays",
+        "No infinite render loops or state update conflicts"
+      ]
+    },
+    {
+      "id": "REQ-127",
+      "text": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Modals and floating widgets render in correct DOM hierarchy",
+        "No portals create invalid parent-child relationships",
+        "Draggable chat widget positioning does not violate DOM constraints"
+      ]
+    },
+    {
+      "id": "REQ-128",
+      "text": "Enable non-minified development build or add source maps to get the full React error message and stack trace for debugging error #185",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Full error message and component stack trace are visible",
+        "Exact component and line number causing error #185 is identified",
+        "Development build successfully reveals root cause"
+      ]
+    },
+    {
+      "id": "REQ-129",
+      "text": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Application deploys successfully without build errors",
+        "All pages load without React runtime errors",
+        "Role selection, dashboard widgets, and chat functionality work correctly",
+        "Browser console shows no React errors or warnings"
       ]
     }
   ],
   "constraints": [
-    "Do not modify the single-actor backend architecture",
-    "Preserve all existing features and functionality during error fixes",
-    "Do not edit read-only frontend paths: useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, main.tsx, and components/ui directory"
+    "Do not change the backend Motoko code as this is a frontend React rendering error",
+    "Preserve all existing component functionality while fixing DOM structure",
+    "Maintain role-based conditional rendering logic for parent and child widgets"
   ],
   "nonGoals": [
-    "Adding new features beyond error fixes",
-    "Refactoring working code that is not causing errors",
-    "Changing the UI design or styling",
-    "Modifying the authentication flow"
+    "Adding new features or components",
+    "Changing application styling or visual design",
+    "Modifying backend data structures or API endpoints"
   ],
   "imageRequirements": {
     "required": [],

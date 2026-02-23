@@ -28,76 +28,62 @@ export default function ShareApp({ highlighted = false }: ShareAppProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant={highlighted ? 'default' : 'outline'} 
-          size="sm" 
-          className={`gap-2 relative ${
-            highlighted 
-              ? 'bg-warm-500 hover:bg-warm-600 animate-pulse shadow-lg' 
-              : ''
+        <Button
+          variant="outline"
+          size="sm"
+          className={`flex items-center gap-2 border-warm-300 hover:bg-warm-50 dark:hover:bg-warm-900 transition-all ${
+            highlighted ? 'ring-2 ring-warm-500 ring-offset-2 animate-pulse bg-warm-100 dark:bg-warm-800' : ''
           }`}
         >
-          {highlighted && (
-            <Sparkles className="h-4 w-4 absolute -top-1 -right-1 text-yellow-400" />
-          )}
+          {highlighted && <Sparkles className="h-4 w-4 text-warm-600" />}
           <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Invite Family</span>
+          <span className="hidden sm:inline">Share App</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Invite Your Family 👨‍👩‍👧‍👦</DialogTitle>
-          <DialogDescription className="text-base">
-            Share this link with your family members to connect on FamilyConnect.
+          <DialogTitle className="text-xl">Share FamilyConnect</DialogTitle>
+          <DialogDescription>
+            Invite your family members to join FamilyConnect and stay connected!
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Your Invitation Link</label>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 px-4 py-3 bg-warm-50 dark:bg-warm-900/30 border border-warm-200 dark:border-warm-700 rounded-lg text-sm font-mono break-all">
-                {appUrl}
-              </code>
-              <Button
-                variant="default"
-                size="lg"
-                onClick={handleCopyLink}
-                className="shrink-0 bg-warm-500 hover:bg-warm-600 px-6"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-5 w-5 mr-2" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-5 w-5 mr-2" />
-                    Copy
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="bg-warm-50 dark:bg-warm-900/30 border border-warm-200 dark:border-warm-700 rounded-lg p-4 space-y-3">
-            <p className="font-semibold text-warm-900 dark:text-warm-100 flex items-center gap-2">
-              <span className="text-lg">📋</span>
-              How it works:
-            </p>
-            <ol className="space-y-2 text-sm text-warm-700 dark:text-warm-300">
-              <li className="flex gap-2">
-                <span className="font-bold text-warm-600">1.</span>
-                <span>Copy and share the link above with your family members</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-bold text-warm-600">2.</span>
-                <span>They'll create their account and choose their role (Parent or Child)</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-bold text-warm-600">3.</span>
-                <span>Connect with them in Settings to start sharing as a family!</span>
-              </li>
+        <div className="space-y-4">
+          <div className="bg-warm-50 dark:bg-warm-900 p-4 rounded-lg border border-warm-200">
+            <p className="text-sm font-medium mb-2 text-warm-900 dark:text-warm-100">How to invite family members:</p>
+            <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+              <li>Copy the app link below</li>
+              <li>Share it with your family via text, email, or messaging app</li>
+              <li>They'll create their account and connect with you!</li>
             </ol>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-muted px-3 py-2 rounded-md text-sm truncate border border-warm-200">
+              {appUrl}
+            </div>
+            <Button
+              onClick={handleCopyLink}
+              size="sm"
+              className="shrink-0 bg-warm-500 hover:bg-warm-600"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 mr-1" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-1" />
+                  Copy
+                </>
+              )}
+            </Button>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-xs text-blue-900 dark:text-blue-100">
+              💡 <strong>Tip:</strong> After they sign up, you can connect as a family through the Settings page by generating an invitation link.
+            </p>
           </div>
         </div>
       </DialogContent>

@@ -1,119 +1,110 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-23T13:30:24.476Z",
+  "generatedAt": "2026-02-23T13:39:49.039Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 5,
+    "total": 7,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-117",
-        "summary": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
-        "status": "implemented",
+        "id": "REQ-123",
+        "summary": "Investigate and resolve React minified error #185 in the deployed application, which typically indicates a hydration mismatch, invalid DOM nesting, or rendering inconsistency between server and client",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/main.tsx"
+          "frontend/vite.config.ts",
+          "frontend/package.json"
         ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useQueries.ts"
-        ]
-      },
-      {
-        "id": "REQ-118",
-        "summary": "Fix any Motoko compilation errors in backend/main.mo that are preventing successful backend build",
-        "status": "unknown",
-        "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-119",
-        "summary": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
-        "status": "implemented",
+        "id": "REQ-124",
+        "summary": "Audit all frontend components for invalid DOM nesting issues, such as <div> inside <p>, <button> inside <button>, or other HTML elements violating nesting rules",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/ChatWidget.tsx",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/pages/Settings.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-125",
+        "summary": "Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for conditional rendering logic that may cause hydration mismatches between initial render and subsequent renders",
+        "status": "missing",
         "plannedFiles": [
           "frontend/src/pages/Dashboard.tsx",
           "frontend/src/pages/Chat.tsx",
-          "frontend/src/pages/EducationalHub.tsx",
           "frontend/src/pages/Settings.tsx",
-          "frontend/src/pages/LocationSharing.tsx",
-          "frontend/src/pages/MediaGallery.tsx",
-          "frontend/src/pages/Reminders.tsx",
-          "frontend/src/components/ChatWidget.tsx",
-          "frontend/src/components/ExpenseInput.tsx",
-          "frontend/src/components/ExpenseChart.tsx",
-          "frontend/src/components/ExpenseAnalysis.tsx",
-          "frontend/src/components/PermissionRequestWidget.tsx",
-          "frontend/src/components/PermissionApprovalInterface.tsx",
-          "frontend/src/components/ShareApp.tsx",
           "frontend/src/components/Layout.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/pages/Settings.tsx",
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-126",
+        "summary": "Verify all React hooks (useState, useEffect, useQuery) in role-based widget rendering on Dashboard.tsx do not cause rendering conflicts or stale closure issues",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/ExpenseInput.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-127",
+        "summary": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
           "frontend/src/components/ChatWidget.tsx",
-          "frontend/src/components/PermissionApprovalInterface.tsx"
-        ]
-      },
-      {
-        "id": "REQ-120",
-        "summary": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
-      },
-      {
-        "id": "REQ-121",
-        "summary": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/main.tsx",
-          "frontend/src/hooks/useActor.ts",
-          "frontend/src/utils/urlParams.ts"
+          "frontend/src/components/ShareApp.tsx"
         ],
         "matchedFiles": [
           "frontend/src/App.tsx",
-          "frontend/src/utils/urlParams.ts"
+          "frontend/src/components/ShareApp.tsx"
         ]
       },
       {
-        "id": "REQ-122",
-        "summary": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
+        "id": "REQ-128",
+        "summary": "Enable non-minified development build or add source maps to get the full React error message and stack trace for debugging error #185",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/vite.config.ts",
+          "frontend/package.json",
+          "frontend/.env.development"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-129",
+        "summary": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Settings.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/App.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/components/ChatWidget.tsx",
-    "frontend/src/components/FightsCreatedWidget.tsx",
-    "frontend/src/components/FightsSolvedWidget.tsx",
-    "frontend/src/components/PermissionApprovalInterface.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/Chat.tsx",
-    "frontend/src/pages/Settings.tsx",
+    "frontend/src/components/ShareApp.tsx",
     "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",

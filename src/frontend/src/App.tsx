@@ -1,7 +1,7 @@
 import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet, useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile, useCreateProfile, useValidateFamilyInvitation } from './hooks/useQueries';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './components/ui/dialog';
 import { Input } from './components/ui/input';
 import { Button } from './components/ui/button';
@@ -30,19 +30,20 @@ function ProfileSetupModal() {
 
   const [displayName, setDisplayName] = useState('');
   const [selectedRole, setSelectedRole] = useState<'parent' | 'child'>('parent');
-  const [isProcessingInvite, setIsProcessingInvite] = useState(false);
+  const hasProcessedInvite = useRef(false);
 
   const isAuthenticated = !!identity;
 
   // Auto-detect and process invitation token from URL
   useEffect(() => {
     const processInvitationToken = async () => {
-      if (!isAuthenticated || !identity || isProcessingInvite) return;
+      // Prevent multiple executions
+      if (!isAuthenticated || !identity || hasProcessedInvite.current) return;
 
       const inviteToken = getInvitationTokenFromURL();
 
       if (inviteToken) {
-        setIsProcessingInvite(true);
+        hasProcessedInvite.current = true;
         console.log('🎟️ Auto-processing invitation token:', inviteToken);
 
         try {
@@ -61,14 +62,12 @@ function ProfileSetupModal() {
           console.error('❌ Failed to validate invitation:', error);
           toast.error(error.message || 'Failed to join family. Please try again.');
           clearInvitationTokenFromURL();
-        } finally {
-          setIsProcessingInvite(false);
         }
       }
     };
 
     processInvitationToken();
-  }, [isAuthenticated, identity, validateInvitation, isProcessingInvite, markStepComplete]);
+  }, [isAuthenticated, identity, validateInvitation, markStepComplete]);
 
   const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
 

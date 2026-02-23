@@ -1,5 +1,5 @@
 {
-  "frontend/src/App.tsx": "Main app component with TanStack Router setup, ProfileSetupModal with role selection, automatic invitation token processing from URL, and proper parameter naming for validation mutation.",
+  "frontend/src/App.tsx": "Main app component with TanStack Router setup, ProfileSetupModal with role selection, automatic invitation token processing using useRef to prevent infinite loops, and proper parameter naming for validation mutation.",
   "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations with proper TypeScript exports including Message type, PermissionType, and all placeholder hooks for features not yet implemented in backend.",
   "frontend/src/components/Layout.tsx": "Application layout with responsive navigation, authentication controls, integrated ShareApp component with conditional tooltip highlighting for first-time parents, footer with attribution, and ChatWidget component that appears on all pages when user is authenticated.",
   "frontend/src/pages/Dashboard.tsx": "Dashboard page with role-based widgets, onboarding guidance alerts for first-time parents and children, expense tracking visible to all users (with ExpenseInput only for parents), permission widgets for children, fight tracking and permission approval for parents, and automatic onboarding step tracking.",

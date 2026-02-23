@@ -2,11 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-investigate-and-identify-the-specific-build-or-deployment-error-that-is-preventing-draft-version-20-from-deploying-successfully",
-      "featureTitle": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
+      "featureId": "feature-review-profilesetupmodal-and-chatwidget-components-for-improper-portal-usage-modal-rendering-or-floating-element-positioning-that-could-cause-dom-nesting-violations",
+      "featureTitle": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/ShareApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,18 +18,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-117"
+        "REQ-127"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-any-typescript-or-react-compilation-errors-in-frontend-source-files-that-are-preventing-successful-frontend-build",
-      "featureTitle": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
+      "featureId": "feature-test-the-application-end-to-end-after-fixes-to-ensure-error-185-is-completely-resolved-and-no-new-react-errors-are-introduced",
+      "featureTitle": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
       "files": [
-        "frontend/src/components/ChatWidget.tsx",
-        "frontend/src/components/PermissionApprovalInterface.tsx",
-        "frontend/src/pages/Chat.tsx",
-        "frontend/src/pages/Settings.tsx"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -41,69 +38,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-119"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-verify-that-all-react-query-hooks-in-usequeries-ts-have-correct-actor-method-calls-and-proper-error-handling",
-      "featureTitle": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
-      "files": [
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-120"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-all-component-imports-and-routing-configuration-in-app-tsx-and-main-tsx-are-correctly-structured-without-circular-dependencies",
-      "featureTitle": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/utils/urlParams.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-121"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-run-the-complete-build-and-deployment-process-end-to-end-to-verify-all-errors-are-resolved-and-the-application-deploys-successfully",
-      "featureTitle": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-122"
+        "REQ-129"
       ],
       "confidence": "high"
     }

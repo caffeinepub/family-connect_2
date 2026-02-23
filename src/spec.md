@@ -1,14 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Diagnose and fix all build and deployment errors preventing Draft Version 20 from deploying successfully.
+**Goal:** Fix React minified error #185 causing runtime failure in the deployed application.
 
 **Planned changes:**
-- Review build logs to identify the exact error causing deployment failure
-- Fix Motoko compilation errors in backend/main.mo
-- Resolve TypeScript and React compilation errors in frontend source files
-- Verify React Query hooks in useQueries.ts have correct actor method calls
-- Ensure all component imports and routing in App.tsx and main.tsx are correct without circular dependencies
-- Run complete build and deployment process end-to-end to verify all errors are resolved
+- Investigate and resolve React error #185 (hydration mismatch or invalid DOM nesting)
+- Audit all frontend components for invalid HTML nesting violations
+- Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for hydration mismatches
+- Verify React hooks in role-based widget rendering on Dashboard.tsx
+- Review ProfileSetupModal and ChatWidget for improper portal usage or DOM violations
+- Enable non-minified build or add source maps to get full error details
+- Test application end-to-end after fixes
 
-**User-visible outcome:** The FamilyConnect application deploys successfully and is accessible at the deployment URL with all existing features functional.
+**User-visible outcome:** Application loads and renders correctly without React errors in the browser console, with all pages and components displaying properly.
