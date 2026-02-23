@@ -1,111 +1,86 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-23T13:39:49.039Z",
+  "generatedAt": "2026-02-23T16:27:17.635Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-123",
-        "summary": "Investigate and resolve React minified error #185 in the deployed application, which typically indicates a hydration mismatch, invalid DOM nesting, or rendering inconsistency between server and client",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/vite.config.ts",
-          "frontend/package.json"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-124",
-        "summary": "Audit all frontend components for invalid DOM nesting issues, such as <div> inside <p>, <button> inside <button>, or other HTML elements violating nesting rules",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/ChatWidget.tsx",
-          "frontend/src/components/Layout.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/pages/Settings.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-125",
-        "summary": "Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for conditional rendering logic that may cause hydration mismatches between initial render and subsequent renders",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/pages/Settings.tsx",
-          "frontend/src/components/Layout.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-126",
-        "summary": "Verify all React hooks (useState, useEffect, useQuery) in role-based widget rendering on Dashboard.tsx do not cause rendering conflicts or stale closure issues",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/ExpenseInput.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-127",
-        "summary": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
+        "id": "REQ-1",
+        "summary": "Add a widget to the dashboard that displays the total number of problems solved, showing a count that can be updated when AI remedies are applied or problems are marked as resolved",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/ChatWidget.tsx",
-          "frontend/src/components/ShareApp.tsx"
+          "frontend/src/components/ProblemsSolvedWidget.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Dashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/ShareApp.tsx"
+          "frontend/src/components/ProblemsSolvedWidget.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-128",
-        "summary": "Enable non-minified development build or add source maps to get the full React error message and stack trace for debugging error #185",
-        "status": "missing",
+        "id": "REQ-2",
+        "summary": "Implement AI-powered chat analysis that detects problems in conversations and automatically generates remedy suggestions to help resolve the identified issues",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/vite.config.ts",
-          "frontend/package.json",
-          "frontend/.env.development"
+          "frontend/src/components/AIConflictAnalysis.tsx",
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
+        "matchedFiles": [
+          "frontend/src/components/AIConflictAnalysis.tsx",
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Ensure all AI-generated remedy suggestions use only parliamentary language, maintaining formal, respectful, and dignified wording in all communications",
+        "status": "unknown",
+        "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-129",
-        "summary": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
+        "id": "REQ-4",
+        "summary": "Add a toggle control that allows users to enable or disable the AI remedy feature, preserving their preference across sessions",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/pages/Dashboard.tsx",
           "frontend/src/pages/Chat.tsx",
-          "frontend/src/components/Layout.tsx",
-          "frontend/src/pages/Settings.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/AIConflictAnalysis.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/AIConflictAnalysis.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/ShareApp.tsx",
-    "frontend/src/utils/urlParams.ts",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AIConflictAnalysis.tsx",
+    "frontend/src/components/ProblemsSolvedWidget.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/Chat.tsx",
+    "frontend/src/pages/Settings.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

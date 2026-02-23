@@ -23,6 +23,15 @@ export interface FamilyMember {
     principal: Principal;
     name: string;
 }
+export interface PermissionRequest {
+    id: string;
+    child: Principal;
+    granted: boolean;
+    timestamp: bigint;
+    requestType: PermissionType;
+    parent: FamilyMember;
+    reason: string;
+}
 export interface FamilyInvitation {
     created: bigint;
     token: string;
@@ -41,18 +50,19 @@ export interface Message {
     chatType: ChatType;
     recipientId?: Principal;
 }
-export interface ExpenseEntry {
-    timestamp: bigint;
-    category: ExpenseCategory;
-    amount: bigint;
-}
 export interface Expenses {
     totalOther: bigint;
     totalGroceries: bigint;
     totalFees: bigint;
     entries: Array<ExpenseEntry>;
 }
+export interface ExpenseEntry {
+    timestamp: bigint;
+    category: ExpenseCategory;
+    amount: bigint;
+}
 export interface UserProfile {
+    aiRemedyEnabled: boolean;
     displayName: string;
     role?: Role;
     lastUpdate: bigint;
@@ -76,6 +86,11 @@ export enum MessageType {
     socialMediaLink = "socialMediaLink",
     groceryList = "groceryList"
 }
+export enum PermissionType {
+    goOut = "goOut",
+    playGames = "playGames",
+    watchYouTube = "watchYouTube"
+}
 export enum Role {
     child = "child",
     parent = "parent"
@@ -91,19 +106,27 @@ export interface backendInterface {
     addParent(parentName: string, parentPrincipal: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createFamilyInvitationToken(child: Principal, validationTimeHours: bigint): Promise<string>;
+    createPermissionRequest(parentPrincipal: Principal, requestType: PermissionType, reason: string): Promise<string>;
     createProfile(displayName: string, role: Role): Promise<void>;
-    deleteAccount(): Promise<void>;
+    getAIRemedyEnabled(): Promise<boolean>;
     getActiveFamilyInvitations(): Promise<Array<FamilyInvitation>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getExpenseSummary(): Promise<Expenses>;
+    getFightsCreated(): Promise<bigint>;
+    getFightsSolved(): Promise<bigint>;
     getMessageHistory(): Promise<Array<Message>>;
+    getPermissionRequests(): Promise<Array<PermissionRequest>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    incrementFightsCreated(): Promise<void>;
+    incrementFightsSolved(): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     removeChild(childPrincipal: Principal): Promise<void>;
     removeParent(parentPrincipal: Principal): Promise<void>;
+    respondToPermissionRequest(requestId: string, granted: boolean): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     sendMessage(text: string, messageType: MessageType, groceryItems: Array<string> | null, socialMediaUrl: string | null, chatType: ChatType, recipientId: Principal | null): Promise<void>;
+    setAIRemedyEnabled(enabled: boolean): Promise<void>;
     updateUserProfile(profile: UserProfile): Promise<void>;
     validateFamilyInvitationToken(token: string, child: Principal): Promise<Principal>;
 }

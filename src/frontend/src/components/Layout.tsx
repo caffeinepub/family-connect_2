@@ -6,10 +6,6 @@ import { Button } from './ui/button';
 import { Home, Image, Bell, MapPin, MessageCircle, Heart, GraduationCap, Settings } from 'lucide-react';
 import ShareApp from './ShareApp';
 import ChatWidget from './ChatWidget';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { useOnboarding } from '../hooks/useOnboarding';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
-import { Role } from '../backend';
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,15 +16,10 @@ export default function Layout({ children }: LayoutProps) {
   const queryClient = useQueryClient();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
-  const { shouldShowGuidance, markStepComplete } = useOnboarding();
-  const { data: userProfile } = useGetCallerUserProfile();
 
   const isAuthenticated = !!identity;
   const disabled = loginStatus === 'logging-in';
   const buttonText = loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login';
-  
-  const isParent = userProfile?.role === Role.parent;
-  const showShareHighlight = isAuthenticated && isParent && shouldShowGuidance('shareButtonHighlight');
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -44,12 +35,6 @@ export default function Layout({ children }: LayoutProps) {
           setTimeout(() => login(), 300);
         }
       }
-    }
-  };
-
-  const handleShareClick = () => {
-    if (showShareHighlight) {
-      markStepComplete('shareButtonHighlight');
     }
   };
 
@@ -78,23 +63,7 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </Link>
             <div className="flex items-center gap-3">
-              {isAuthenticated && (
-                <TooltipProvider>
-                  <Tooltip open={showShareHighlight}>
-                    <TooltipTrigger asChild>
-                      <div onClick={handleShareClick}>
-                        <ShareApp highlighted={showShareHighlight} />
-                      </div>
-                    </TooltipTrigger>
-                    {showShareHighlight && (
-                      <TooltipContent side="bottom" className="bg-warm-600 text-white">
-                        <p className="font-medium">👋 Invite your family members!</p>
-                        <p className="text-xs">Click here to share your invitation link</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+              {isAuthenticated && <ShareApp />}
               <Button
                 onClick={handleAuth}
                 disabled={disabled}

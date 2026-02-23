@@ -1,208 +1,89 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix React minified error #185 causing runtime failure",
+  "title": "Add AI chat analysis with parliamentary language remedies and problems solved widget",
   "requirements": [
     {
-      "id": "REQ-123",
-      "summary": "Investigate and resolve React minified error #185 in the deployed application, which typically indicates a hydration mismatch, invalid DOM nesting, or rendering inconsistency between server and client",
+      "id": "REQ-1",
+      "summary": "Add widget to dashboard displaying total number of problems solved",
       "acceptanceCriteria": [
-        "React error #185 no longer appears in browser console after deployment",
-        "Application loads and renders without runtime errors",
-        "All pages and components display correctly without hydration warnings"
+        "Widget displays a numeric count of total problems solved",
+        "Count updates when problems are resolved through AI remedies or manual resolution",
+        "Widget is visible on the dashboard page"
       ],
       "file_operations": [
         {
-          "path": "frontend/vite.config.ts",
+          "path": "frontend/src/components/ProblemsSolvedWidget.tsx",
           "operation": "modify",
-          "description": "Configure Vite to generate source maps in production builds by adding 'sourcemap: true' to the build configuration. This enables full React error messages and stack traces for debugging error #185 in deployed environments."
-        },
-        {
-          "path": "frontend/package.json",
-          "operation": "modify",
-          "description": "Add a 'dev:debug' script that runs the development server with React's non-minified build to reveal the full error message and component stack trace for error #185."
-        }
-      ]
-    },
-    {
-      "id": "REQ-124",
-      "summary": "Audit all frontend components for invalid DOM nesting issues, such as <div> inside <p>, <button> inside <button>, or other HTML elements violating nesting rules",
-      "acceptanceCriteria": [
-        "All component JSX follows valid HTML nesting rules",
-        "No nested interactive elements (buttons inside buttons, links inside buttons)",
-        "Block-level elements are not nested inside inline elements"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ChatWidget.tsx",
-          "operation": "modify",
-          "description": "Audit JSX structure for invalid DOM nesting, particularly checking that draggable elements, buttons, and message containers follow valid HTML hierarchy. Ensure no block-level elements are nested inside inline elements, and no interactive elements (buttons/links) are nested within each other."
-        },
-        {
-          "path": "frontend/src/components/Layout.tsx",
-          "operation": "modify",
-          "description": "Review header navigation, authentication buttons, and chat widget integration for invalid DOM nesting. Verify that navigation links are not nested inside buttons, and that the layout structure follows valid HTML element parent-child relationships."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Audit all widget components, card structures, and interactive elements for DOM nesting violations. Check that widget containers, buttons for editing counters, and permission request cards do not contain nested interactive elements or invalid block/inline element combinations."
-        },
-        {
-          "path": "frontend/src/pages/Chat.tsx",
-          "operation": "modify",
-          "description": "Review message rendering, message type selection buttons, recipient selection, and social media link displays for invalid DOM nesting. Ensure message cards do not contain nested buttons or links inside clickable containers."
-        },
-        {
-          "path": "frontend/src/pages/Settings.tsx",
-          "operation": "modify",
-          "description": "Audit profile update forms, invitation token displays with copy buttons, and account deletion buttons for nested interactive elements. Verify that form buttons and action buttons are not nested within each other or within invalid parent elements."
-        }
-      ]
-    },
-    {
-      "id": "REQ-125",
-      "summary": "Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for conditional rendering logic that may cause hydration mismatches between initial render and subsequent renders",
-      "acceptanceCriteria": [
-        "Conditional rendering based on authentication state uses consistent logic",
-        "No components render different content on client vs server hydration",
-        "Loading states are properly managed to prevent render mismatches"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Review role-based conditional rendering for parent and child widgets. Ensure that authentication checks and role checks use consistent logic that produces the same render output on initial load and subsequent renders. Add proper loading states that prevent content flash and hydration mismatches."
-        },
-        {
-          "path": "frontend/src/pages/Chat.tsx",
-          "operation": "modify",
-          "description": "Audit authentication-gated access and message type conditional rendering logic. Ensure that conditional renders based on authentication state, message history loading, and AI analysis toggles maintain consistent DOM structure between initial and subsequent renders."
-        },
-        {
-          "path": "frontend/src/pages/Settings.tsx",
-          "operation": "modify",
-          "description": "Review conditional rendering for role-based features (parent-only invitation generation), profile data loading states, and account deletion confirmation. Ensure consistent render output regardless of timing of data fetches."
-        },
-        {
-          "path": "frontend/src/components/Layout.tsx",
-          "operation": "modify",
-          "description": "Audit authentication-based navigation visibility, login/logout button state, and chat widget conditional rendering. Ensure that authentication state checks produce consistent DOM structure and do not cause hydration mismatches when identity loads asynchronously."
-        }
-      ]
-    },
-    {
-      "id": "REQ-126",
-      "summary": "Verify all React hooks (useState, useEffect, useQuery) in role-based widget rendering on Dashboard.tsx do not cause rendering conflicts or stale closure issues",
-      "acceptanceCriteria": [
-        "Dashboard role-based widget conditional rendering works without errors",
-        "React hooks have correct dependency arrays",
-        "No infinite render loops or state update conflicts"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Review all useQuery hooks for user profile, expenses, permissions, and family data. Verify dependency arrays in useEffect hooks are complete and correct. Check that role-based widget conditional rendering does not cause state updates during render or create stale closures."
+          "description": "Update the existing ProblemsSolvedWidget component to display a count of total problems solved (combining educational doubts resolved and family conflicts resolved). Wire it to use both getFightsSolved and any educational problem resolution count from the backend. Ensure the count updates dynamically when problems are marked as resolved."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Audit all React Query hooks for proper enabled conditions, dependency tracking, and refetch logic. Ensure that query keys are stable and do not cause unnecessary re-renders or conflicts when used in Dashboard widget rendering."
-        },
-        {
-          "path": "frontend/src/components/ExpenseInput.tsx",
-          "operation": "modify",
-          "description": "Review mutation hooks and form state management for proper dependency arrays and state update patterns. Ensure that expense mutations do not trigger render conflicts when Dashboard queries refetch."
-        }
-      ]
-    },
-    {
-      "id": "REQ-127",
-      "summary": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
-      "acceptanceCriteria": [
-        "Modals and floating widgets render in correct DOM hierarchy",
-        "No portals create invalid parent-child relationships",
-        "Draggable chat widget positioning does not violate DOM constraints"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Review ProfileSetupModal rendering logic, portal usage (if any), and conditional rendering based on authentication and profile fetch state. Ensure modal opens only when both authenticated and profile is confirmed null (not during loading state), preventing hydration mismatches."
-        },
-        {
-          "path": "frontend/src/components/ChatWidget.tsx",
-          "operation": "modify",
-          "description": "Audit draggable floating widget positioning logic and DOM structure. Verify that the widget's absolute positioning and drag handlers do not create invalid DOM parent-child relationships. Check that the widget container is properly placed in the Layout component without nesting violations."
-        },
-        {
-          "path": "frontend/src/components/ShareApp.tsx",
-          "operation": "modify",
-          "description": "Review dialog/modal component usage for proper portal rendering and DOM hierarchy. If using shadcn/ui Dialog components, verify they render in a portal at document root level and do not cause nesting violations with their trigger buttons."
-        }
-      ]
-    },
-    {
-      "id": "REQ-128",
-      "summary": "Enable non-minified development build or add source maps to get the full React error message and stack trace for debugging error #185",
-      "acceptanceCriteria": [
-        "Full error message and component stack trace are visible",
-        "Exact component and line number causing error #185 is identified",
-        "Development build successfully reveals root cause"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/vite.config.ts",
-          "operation": "modify",
-          "description": "Add source map configuration to the Vite build settings: set 'build.sourcemap' to true or 'inline' to generate source maps that map minified production code back to original source files. This enables full error messages and precise stack traces for React error #185."
-        },
-        {
-          "path": "frontend/package.json",
-          "operation": "modify",
-          "description": "Add a development debugging script such as 'dev:debug' that runs 'vite --mode development' to ensure non-minified React builds with full error messages and component stack traces for local debugging."
-        },
-        {
-          "path": "frontend/.env.development",
-          "operation": "create",
-          "description": "Create a development environment file that sets VITE_ENVIRONMENT=development to ensure React runs in development mode locally, providing full error messages instead of minified error codes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-129",
-      "summary": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
-      "acceptanceCriteria": [
-        "Application deploys successfully without build errors",
-        "All pages load without React runtime errors",
-        "Role selection, dashboard widgets, and chat functionality work correctly",
-        "Browser console shows no React errors or warnings"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add error boundary component wrapping the entire application to catch and log any remaining React errors during testing. Verify ProfileSetupModal, router navigation, and invitation token processing work without errors after all fixes are applied."
+          "description": "Add a query hook useGetTotalProblemsSolved that fetches the combined count of fights solved (via getFightsSolved) and educational problems resolved. This hook should aggregate both data sources to provide a single total count for the widget."
         },
         {
           "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Test all role-based widget rendering paths (parent vs child dashboards), verify permission requests display correctly, test happiness meter, expense tracking, and fights/problems solved widgets render without errors."
+          "description": "Ensure the ProblemsSolvedWidget is properly displayed on the dashboard for both parent and child role views. Verify it's positioned appropriately in the widget grid alongside other dashboard components."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement AI-powered chat analysis that detects problems and generates remedy suggestions",
+      "acceptanceCriteria": [
+        "AI analyzes chat messages to identify problems or conflicts",
+        "System generates specific remedy suggestions for detected problems",
+        "Remedies are displayed to users in the chat interface"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AIConflictAnalysis.tsx",
+          "operation": "modify",
+          "description": "Extend the existing AIConflictAnalysis component to integrate with the chat message history. Instead of mock data, fetch actual messages using the message history query and analyze them for conflicts. Display detected problems with AI-generated remedy suggestions in parliamentary language. Add functionality to mark remedies as applied, which should update the problems solved count. Verify the component's usage instructions from the authorization component before implementing."
         },
         {
           "path": "frontend/src/pages/Chat.tsx",
           "operation": "modify",
-          "description": "Test group and private messaging, verify message type selection (text, grocery list, social media link) renders correctly, test AI conflict analysis toggle, and ensure recipient selection works without DOM errors."
+          "description": "Integrate the enhanced AIConflictAnalysis component into the chat page UI. Position it alongside the chat message display so users can see detected problems and remedies while conversing. Ensure the component appears only when AI remedy is enabled (controlled by the toggle in REQ-4)."
         },
         {
-          "path": "frontend/src/components/Layout.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Test navigation between all pages, verify authentication flow (login/logout), test chat widget opening/closing and dragging, verify onboarding tooltips display correctly without causing React errors."
+          "description": "Add mutation hooks for marking AI remedies as applied (useApplyRemedy) and for incrementing the problems solved counter when a remedy successfully resolves a conflict. Wire these mutations to trigger query invalidation for the total problems solved count."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add toggle control to enable or disable AI remedy feature with persistent preference",
+      "acceptanceCriteria": [
+        "Toggle control is accessible in the chat interface or settings",
+        "When disabled, AI remedies are not generated or displayed",
+        "User preference persists across sessions",
+        "Toggle state is stored in user profile or local storage"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Chat.tsx",
+          "operation": "modify",
+          "description": "Add a toggle switch control to the chat page header that allows users to enable or disable the AI remedy feature. Wire the toggle to the user profile's aiRemedyEnabled field using the backend's getAIRemedyEnabled and setAIRemedyEnabled methods. When disabled, hide the AIConflictAnalysis component. Use shadcn/ui Switch component for consistent styling."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add query and mutation hooks for the AI remedy toggle: useGetAIRemedyEnabled to fetch the current state from the backend and useSetAIRemedyEnabled to update the preference. Ensure the preference persists in the user profile and invalidate relevant queries on update."
         },
         {
           "path": "frontend/src/pages/Settings.tsx",
           "operation": "modify",
-          "description": "Test profile updates, verify invitation token generation and display for parents, test account deletion confirmation, ensure all role-based conditional features render correctly without errors."
+          "description": "Add a settings section with a toggle control for the AI remedy feature, mirroring the functionality available in the chat page. This provides an alternative access point for users who prefer to manage the setting from the settings page. Display the current state using the useGetAIRemedyEnabled query."
+        },
+        {
+          "path": "frontend/src/components/AIConflictAnalysis.tsx",
+          "operation": "modify",
+          "description": "Update the component to respect the AI remedy enabled state. When the toggle is off, display a message indicating that AI remedies are disabled instead of showing conflict analysis. Fetch the toggle state using the useGetAIRemedyEnabled query hook."
         }
       ]
     }

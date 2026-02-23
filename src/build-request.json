@@ -1,127 +1,93 @@
 {
   "kind": "build_request",
-  "title": "Fix React minified error #185 causing runtime failure",
-  "priority": "high",
+  "title": "Add AI chat analysis with parliamentary language remedies and problems solved widget",
+  "projectName": "FamilyConnect",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-123",
-      "text": "Investigate and resolve React minified error #185 in the deployed application, which typically indicates a hydration mismatch, invalid DOM nesting, or rendering inconsistency between server and client",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Add a widget to the dashboard that displays the total number of problems solved, showing a count that can be updated when AI remedies are applied or problems are marked as resolved",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "Minified React error #185; visit https://react.dev/errors/185 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+          "it should havwe widget for  number probelem solved"
         ]
       },
       "acceptanceCriteria": [
-        "React error #185 no longer appears in browser console after deployment",
-        "Application loads and renders without runtime errors",
-        "All pages and components display correctly without hydration warnings"
+        "Widget displays a numeric count of total problems solved",
+        "Count updates when problems are resolved through AI remedies or manual resolution",
+        "Widget is visible on the dashboard page"
       ]
     },
     {
-      "id": "REQ-124",
-      "text": "Audit all frontend components for invalid DOM nesting issues, such as <div> inside <p>, <button> inside <button>, or other HTML elements violating nesting rules",
-      "target": "frontend",
+      "id": "REQ-2",
+      "text": "Implement AI-powered chat analysis that detects problems in conversations and automatically generates remedy suggestions to help resolve the identified issues",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-latest"
+        ],
+        "quotes": [
+          "the aiit should give remedies to the probelems"
         ]
       },
       "acceptanceCriteria": [
-        "All component JSX follows valid HTML nesting rules",
-        "No nested interactive elements (buttons inside buttons, links inside buttons)",
-        "Block-level elements are not nested inside inline elements"
+        "AI analyzes chat messages to identify problems or conflicts",
+        "System generates specific remedy suggestions for detected problems",
+        "Remedies are displayed to users in the chat interface"
       ]
     },
     {
-      "id": "REQ-125",
-      "text": "Check Dashboard.tsx, Chat.tsx, Settings.tsx, and Layout.tsx for conditional rendering logic that may cause hydration mismatches between initial render and subsequent renders",
-      "target": "frontend",
+      "id": "REQ-3",
+      "text": "Ensure all AI-generated remedy suggestions use only parliamentary language, maintaining formal, respectful, and dignified wording in all communications",
+      "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
+        ],
+        "quotes": [
+          "the ai should only use parlimentary words"
         ]
       },
       "acceptanceCriteria": [
-        "Conditional rendering based on authentication state uses consistent logic",
-        "No components render different content on client vs server hydration",
-        "Loading states are properly managed to prevent render mismatches"
+        "All AI remedy text uses formal parliamentary language conventions",
+        "Language is respectful, dignified, and avoids casual or colloquial expressions",
+        "Remedies maintain a professional tone appropriate for parliamentary discourse"
       ]
     },
     {
-      "id": "REQ-126",
-      "text": "Verify all React hooks (useState, useEffect, useQuery) in role-based widget rendering on Dashboard.tsx do not cause rendering conflicts or stale closure issues",
-      "target": "frontend",
+      "id": "REQ-4",
+      "text": "Add a toggle control that allows users to enable or disable the AI remedy feature, preserving their preference across sessions",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-previous"
+        ],
+        "quotes": [
+          "if user don't like the remedies they can turn it off"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard role-based widget conditional rendering works without errors",
-        "React hooks have correct dependency arrays",
-        "No infinite render loops or state update conflicts"
-      ]
-    },
-    {
-      "id": "REQ-127",
-      "text": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Modals and floating widgets render in correct DOM hierarchy",
-        "No portals create invalid parent-child relationships",
-        "Draggable chat widget positioning does not violate DOM constraints"
-      ]
-    },
-    {
-      "id": "REQ-128",
-      "text": "Enable non-minified development build or add source maps to get the full React error message and stack trace for debugging error #185",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Full error message and component stack trace are visible",
-        "Exact component and line number causing error #185 is identified",
-        "Development build successfully reveals root cause"
-      ]
-    },
-    {
-      "id": "REQ-129",
-      "text": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Application deploys successfully without build errors",
-        "All pages load without React runtime errors",
-        "Role selection, dashboard widgets, and chat functionality work correctly",
-        "Browser console shows no React errors or warnings"
+        "Toggle control is accessible in the chat interface or settings",
+        "When disabled, AI remedies are not generated or displayed",
+        "User preference persists across sessions",
+        "Toggle state is stored in user profile or local storage"
       ]
     }
   ],
   "constraints": [
-    "Do not change the backend Motoko code as this is a frontend React rendering error",
-    "Preserve all existing component functionality while fixing DOM structure",
-    "Maintain role-based conditional rendering logic for parent and child widgets"
+    "AI remedy language must strictly adhere to parliamentary conventions",
+    "Existing AIConflictAnalysis component should be integrated or extended for chat analysis",
+    "Problems solved count must persist in backend storage"
   ],
   "nonGoals": [
-    "Adding new features or components",
-    "Changing application styling or visual design",
-    "Modifying backend data structures or API endpoints"
+    "Integration with external AI services or APIs",
+    "Real-time WebSocket-based chat updates",
+    "Voice or video chat capabilities",
+    "Multi-language support for parliamentary terms"
   ],
   "imageRequirements": {
     "required": [],

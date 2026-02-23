@@ -1,29 +1,32 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type {
-  UserProfile,
+import { useInternetIdentity } from './useInternetIdentity';
+import type { 
+  UserProfile, 
   Role,
   ExpenseCategory,
   Expenses,
-  Message,
-  MessageType,
-  ChatType,
   FamilyInvitation,
+  MessageType,
+  Message as BackendMessage,
 } from '../backend';
+import { ChatType } from '../backend';
 import { Principal } from '@dfinity/principal';
 import { ExternalBlob } from '../backend';
 import { toast } from 'sonner';
 
-// Re-export types for use in components
-export type { Message };
-
-export type PermissionType = 'goOut' | 'playGames' | 'watchYouTube';
+// Re-export Message type from backend
+export type Message = BackendMessage;
 
 export type Location = {
   latitude: number;
   longitude: number;
   timestamp: bigint;
 };
+
+export type PermissionType = 'goOut' | 'playGames' | 'watchYouTube';
+
+export type FileType = 'questionPaper' | 'answerScript';
 
 type QuestionPaper = {
   id: string;
@@ -70,6 +73,12 @@ type ICTechnologyTip = {
   timestamp: bigint;
 };
 
+type Update = {
+  author: Principal;
+  text: string;
+  timestamp: bigint;
+};
+
 type Media = {
   author: Principal;
   file: ExternalBlob;
@@ -92,7 +101,15 @@ export function useGetCallerUserProfile() {
     queryKey: ['currentUserProfile'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.getCallerUserProfile();
+      console.log('🔍 [useGetCallerUserProfile] Query starting - fetching user profile...');
+      const profile = await actor.getCallerUserProfile();
+      console.log('📦 [useGetCallerUserProfile] Profile fetched from backend:', {
+        profile,
+        hasProfile: profile !== null,
+        displayName: profile?.displayName,
+        role: profile?.role,
+      });
+      return profile;
     },
     enabled: !!actor && !actorFetching,
     retry: false,
@@ -105,6 +122,20 @@ export function useGetCallerUserProfile() {
   };
 }
 
+export function useGetUserProfileByPrincipal(principal: Principal | null) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<UserProfile | null>({
+    queryKey: ['userProfile', principal?.toString()],
+    queryFn: async () => {
+      if (!actor || !principal) return null;
+      return actor.getUserProfile(principal);
+    },
+    enabled: !!actor && !actorFetching && !!principal,
+    retry: false,
+  });
+}
+
 export function useCreateProfile() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -112,13 +143,41 @@ export function useCreateProfile() {
   return useMutation({
     mutationFn: async ({ displayName, role }: { displayName: string; role: Role }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createProfile(displayName, role);
+      console.log('💾 [useCreateProfile] Mutation starting - creating profile with:', { 
+        displayName, 
+        role,
+      });
+      const result = await actor.createProfile(displayName, role);
+      console.log('✅ [useCreateProfile] Profile created successfully');
+      return result;
+    },
+    onSuccess: () => {
+      console.log('🔄 [useCreateProfile] Success callback - invalidating profile queries...');
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useCreateProfile] Mutation failed:', error);
+    },
+  });
+}
+
+export function useSaveCallerUserProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profile: UserProfile) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('💾 [useSaveCallerUserProfile] Saving profile');
+      const result = await actor.saveCallerUserProfile(profile);
+      console.log('✅ [useSaveCallerUserProfile] Profile saved successfully');
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create profile: ${error.message}`);
+    onError: (error) => {
+      console.error('❌ [useSaveCallerUserProfile] Failed to save profile:', error);
     },
   });
 }
@@ -130,18 +189,35 @@ export function useUpdateUserProfile() {
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateUserProfile(profile);
+      console.log('🔄 [useUpdateUserProfile] Updating profile');
+      const result = await actor.updateUserProfile(profile);
+      console.log('✅ [useUpdateUserProfile] Profile updated successfully');
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Profile updated successfully');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to update profile: ${error.message}`);
+    onError: (error) => {
+      console.error('❌ [useUpdateUserProfile] Failed to update profile:', error);
     },
   });
 }
 
+export function useGetAllProfiles() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<UserProfile[]>({
+    queryKey: ['allProfiles'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return [];
+    },
+    enabled: !!actor && !isFetching,
+    refetchInterval: 10000,
+  });
+}
+
+// Family Structure Management
 export function useAddParent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -149,14 +225,14 @@ export function useAddParent() {
   return useMutation({
     mutationFn: async ({ parentName, parentPrincipal }: { parentName: string; parentPrincipal: Principal }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addParent(parentName, parentPrincipal);
+      await actor.addParent(parentName, parentPrincipal);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Parent added successfully');
+      toast.success('Parent added successfully!');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to add parent: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to add parent');
     },
   });
 }
@@ -168,14 +244,14 @@ export function useRemoveParent() {
   return useMutation({
     mutationFn: async (parentPrincipal: Principal) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.removeParent(parentPrincipal);
+      await actor.removeParent(parentPrincipal);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Parent removed successfully');
+      toast.success('Parent removed successfully!');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to remove parent: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to remove parent');
     },
   });
 }
@@ -187,14 +263,14 @@ export function useAddChild() {
   return useMutation({
     mutationFn: async ({ childName, childPrincipal }: { childName: string; childPrincipal: Principal }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addChild(childName, childPrincipal);
+      await actor.addChild(childName, childPrincipal);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Child added successfully');
+      toast.success('Child added successfully!');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to add child: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to add child');
     },
   });
 }
@@ -206,75 +282,33 @@ export function useRemoveChild() {
   return useMutation({
     mutationFn: async (childPrincipal: Principal) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.removeChild(childPrincipal);
+      await actor.removeChild(childPrincipal);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Child removed successfully');
+      toast.success('Child removed successfully!');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to remove child: ${error.message}`);
-    },
-  });
-}
-
-export function useAddExpense() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ category, amount }: { category: ExpenseCategory; amount: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.addExpense(category, amount);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenseSummary'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      toast.success('Expense added successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to add expense: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to remove child');
     },
   });
 }
 
-export function useGetExpenseSummary() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<Expenses>({
-    queryKey: ['expenseSummary'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getExpenseSummary();
-    },
-    enabled: !!actor && !actorFetching,
-  });
-}
-
-export function useWeeklyExpenses() {
-  const { data: expenseSummary } = useGetExpenseSummary();
-  return useQuery({
-    queryKey: ['weeklyExpenses'],
-    queryFn: () => expenseSummary || { entries: [], totalFees: BigInt(0), totalGroceries: BigInt(0), totalOther: BigInt(0) },
-    enabled: !!expenseSummary,
-  });
-}
-
+// Family Invitation Queries
 export function useCreateFamilyInvitation() {
   const { actor } = useActor();
-  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
-    mutationFn: async ({ child, validationTimeHours }: { child: Principal; validationTimeHours: bigint }) => {
+    mutationFn: async ({ childPrincipal, validationTimeHours }: { childPrincipal: Principal; validationTimeHours: bigint }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createFamilyInvitationToken(child, validationTimeHours);
+      if (!identity) throw new Error('Not authenticated');
+      
+      const token = await actor.createFamilyInvitationToken(childPrincipal, validationTimeHours);
+      return token;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activeFamilyInvitations'] });
-      toast.success('Invitation created successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create invitation: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to create invitation');
     },
   });
 }
@@ -284,33 +318,73 @@ export function useValidateFamilyInvitation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ token, child }: { token: string; child: Principal }) => {
+    mutationFn: async ({ token, childPrincipal }: { token: string; childPrincipal: Principal }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.validateFamilyInvitationToken(token, child);
+      const parentPrincipal = await actor.validateFamilyInvitationToken(token, childPrincipal);
+      return parentPrincipal;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      queryClient.invalidateQueries({ queryKey: ['activeFamilyInvitations'] });
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to validate invitation: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: ['familyInvitations'] });
     },
   });
 }
 
 export function useGetActiveFamilyInvitations() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching } = useActor();
 
   return useQuery<FamilyInvitation[]>({
-    queryKey: ['activeFamilyInvitations'],
+    queryKey: ['familyInvitations'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getActiveFamilyInvitations();
+      if (!actor) return [];
+      const invitations = await actor.getActiveFamilyInvitations();
+      return invitations;
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !isFetching,
   });
 }
 
+// Expense Management
+export function useAddExpense() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ category, amount }: { category: ExpenseCategory; amount: bigint }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.addExpense(category, amount);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      toast.success('Expense added successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to add expense');
+    },
+  });
+}
+
+export function useGetExpenseSummary() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Expenses>({
+    queryKey: ['expenses'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      const summary = await actor.getExpenseSummary();
+      return summary;
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Alias for expense chart/analysis
+export function useWeeklyExpenses() {
+  return useGetExpenseSummary();
+}
+
+// Message/Chat Queries
 export function useSendMessage() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -326,125 +400,282 @@ export function useSendMessage() {
     }: {
       text: string;
       messageType: MessageType;
-      groceryItems: string[] | null;
-      socialMediaUrl: string | null;
+      groceryItems?: string[];
+      socialMediaUrl?: string;
       chatType: ChatType;
-      recipientId: Principal | null;
+      recipientId?: Principal;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.sendMessage(text, messageType, groceryItems, socialMediaUrl, chatType, recipientId);
+      
+      await actor.sendMessage(
+        text,
+        messageType,
+        groceryItems || null,
+        socialMediaUrl || null,
+        chatType,
+        recipientId || null
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messageHistory'] });
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to send message: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to send message');
     },
   });
 }
 
 export function useGetMessageHistory() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching } = useActor();
 
   return useQuery<Message[]>({
-    queryKey: ['messageHistory'],
+    queryKey: ['messages'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getMessageHistory();
+      if (!actor) return [];
+      const messages = await actor.getMessageHistory();
+      return messages;
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !isFetching,
+    refetchInterval: 5000,
   });
 }
 
+// Alias for chat components
 export function useGetMessages(chatType?: ChatType, recipientId?: Principal) {
-  return useGetMessageHistory();
+  const { data: allMessages, ...rest } = useGetMessageHistory();
+  
+  // Filter messages based on chat type and recipient
+  const filteredMessages = allMessages?.filter(msg => {
+    if (chatType === ChatType.group) {
+      return msg.chatType === ChatType.group;
+    }
+    if (chatType === ChatType.privateChat && recipientId) {
+      return msg.chatType === ChatType.privateChat && 
+             (msg.recipientId?.toString() === recipientId.toString() || 
+              msg.author.toString() === recipientId.toString());
+    }
+    return true;
+  });
+
+  return { data: filteredMessages, ...rest };
 }
 
-export function useDeleteAccount() {
+// AI Remedy Toggle
+export function useGetAIRemedyEnabled() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['aiRemedyEnabled'],
+    queryFn: async () => {
+      if (!actor) return true;
+      return actor.getAIRemedyEnabled();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSetAIRemedyEnabled() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (enabled: boolean) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.deleteAccount();
+      await actor.setAIRemedyEnabled(enabled);
     },
     onSuccess: () => {
-      queryClient.clear();
-      toast.success('Account deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['aiRemedyEnabled'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete account: ${error.message}`);
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update AI remedy setting');
     },
   });
+}
+
+// Problems Solved (Fights + Educational)
+export function useGetFightsSolved() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<bigint>({
+    queryKey: ['fightsSolved'],
+    queryFn: async () => {
+      if (!actor) return BigInt(0);
+      return actor.getFightsSolved();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetFightsCreated() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<bigint>({
+    queryKey: ['fightsCreated'],
+    queryFn: async () => {
+      if (!actor) return BigInt(0);
+      return actor.getFightsCreated();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetTotalProblemsSolved() {
+  const { data: fightsSolved } = useGetFightsSolved();
+  const { data: educationalProblems } = useGetProblemsSolved();
+
+  const total = (fightsSolved || BigInt(0)) + (educationalProblems || BigInt(0));
+
+  return {
+    data: total,
+    isLoading: false,
+  };
 }
 
 // Placeholder hooks for features not yet implemented in backend
-export function useGetMedia() {
+export function useRequestPermission() {
+  return useMutation({
+    mutationFn: async (data: any) => {
+      toast.info('Permission request feature coming soon!');
+      throw new Error('Backend method not implemented');
+    },
+  });
+}
+
+export function useGetPendingPermissions() {
+  return useQuery({
+    queryKey: ['pendingPermissions'],
+    queryFn: async () => [],
+    enabled: false,
+  });
+}
+
+export function useApprovePermission() {
+  return useMutation({
+    mutationFn: async (data: any) => {
+      toast.info('Permission approval feature coming soon!');
+      throw new Error('Backend method not implemented');
+    },
+  });
+}
+
+export function useGetFightCounters() {
+  return useQuery({
+    queryKey: ['fightCounters'],
+    queryFn: async () => [BigInt(0), BigInt(0)] as [bigint, bigint],
+    enabled: false,
+  });
+}
+
+export function useUpdateFightsSolved() {
+  return useMutation({
+    mutationFn: async (count: number) => {
+      toast.info('Fight tracking feature coming soon!');
+      throw new Error('Backend method not implemented');
+    },
+  });
+}
+
+export function useUpdateFightsCreated() {
+  return useMutation({
+    mutationFn: async (count: number) => {
+      toast.info('Fight tracking feature coming soon!');
+      throw new Error('Backend method not implemented');
+    },
+  });
+}
+
+export function useGetHappinessScore() {
+  return useQuery({
+    queryKey: ['happinessScore'],
+    queryFn: async () => 75,
+  });
+}
+
+export function useGetProblemsSolved() {
+  return useQuery({
+    queryKey: ['problemsSolved'],
+    queryFn: async () => BigInt(0),
+  });
+}
+
+// Alias
+export function useGetResolvedProblemsCount() {
+  return useGetTotalProblemsSolved();
+}
+
+export function useGetUpdates() {
+  return useQuery<Update[]>({
+    queryKey: ['updates'],
+    queryFn: async () => [],
+  });
+}
+
+export function useGetMediaPosts() {
   return useQuery<Media[]>({
     queryKey: ['mediaPosts'],
     queryFn: async () => [],
-    enabled: false,
   });
 }
 
-export function useAddMedia() {
-  const queryClient = useQueryClient();
+// Alias
+export function useGetMedia() {
+  return useGetMediaPosts();
+}
+
+export function useUploadMedia() {
   return useMutation({
-    mutationFn: async (_params: { file: ExternalBlob; description: string }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mediaPosts'] });
+    mutationFn: async (data: any) => {
+      toast.info('Media upload feature coming soon!');
+      throw new Error('Backend method not implemented');
     },
   });
 }
 
-export function useGetAllProfiles() {
-  return useQuery<UserProfile[]>({
-    queryKey: ['allProfiles'],
-    queryFn: async () => [],
-    enabled: false,
-  });
+// Alias
+export function useAddMedia() {
+  return useUploadMedia();
 }
 
 export function useGetReminders() {
   return useQuery<Reminder[]>({
     queryKey: ['reminders'],
     queryFn: async () => [],
-    enabled: false,
   });
 }
 
-export function useAddReminder() {
-  const queryClient = useQueryClient();
+export function useCreateReminder() {
   return useMutation({
-    mutationFn: async (_params: { text: string; dueDate: bigint }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    mutationFn: async (data: any) => {
+      toast.info('Reminder feature coming soon!');
+      throw new Error('Backend method not implemented');
     },
   });
+}
+
+// Alias
+export function useAddReminder() {
+  return useCreateReminder();
+}
+
+export function useGetLocations() {
+  return useQuery<any[]>({
+    queryKey: ['locations'],
+    queryFn: async () => [],
+  });
+}
+
+// Alias
+export function useGetFamilyLocations() {
+  return useGetLocations();
 }
 
 export function useShareLocation() {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (_params: { latitude: number; longitude: number; timestamp: bigint }) => {
-      throw new Error('Backend implementation not available yet');
+    mutationFn: async (data: any) => {
+      toast.info('Location sharing feature coming soon!');
+      throw new Error('Backend method not implemented');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['familyLocations'] });
-    },
-  });
-}
-
-export function useGetFamilyLocations() {
-  return useQuery<Location[]>({
-    queryKey: ['familyLocations'],
-    queryFn: async () => [],
-    enabled: false,
   });
 }
 
@@ -461,47 +692,38 @@ export function useGetEducationalData() {
       studyTips: [],
       academicReminders: [],
     }),
-    enabled: false,
   });
 }
 
 export function useUploadQuestionPaper() {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (_params: { title: string; file: ExternalBlob }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['educationalData'] });
+    mutationFn: async (data: any) => {
+      toast.info('Educational features coming soon!');
+      throw new Error('Backend method not implemented');
     },
   });
 }
 
 export function useUploadAnswerScript() {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (_params: { file: ExternalBlob }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['educationalData'] });
+    mutationFn: async (data: any) => {
+      toast.info('Educational features coming soon!');
+      throw new Error('Backend method not implemented');
     },
   });
 }
 
 export function useGetAIReviews() {
-  return useQuery<AIPerformanceReview[]>({
-    queryKey: ['aiPerformanceReviews'],
-    queryFn: async () => [],
-    enabled: false,
+  return useQuery<[AIPerformanceReview[], ICTechnologyTip[]]>({
+    queryKey: ['aiReviews'],
+    queryFn: async () => [[], []],
   });
 }
 
-export function useGetICTechnologyTips() {
+export function useGetTechnologyTips() {
   return useQuery<ICTechnologyTip[]>({
-    queryKey: ['icTechnologyTips'],
+    queryKey: ['technologyTips'],
     queryFn: async () => [],
-    enabled: false,
   });
 }
 
@@ -509,95 +731,31 @@ export function useGetStudyTips() {
   return useQuery<string[]>({
     queryKey: ['studyTips'],
     queryFn: async () => [],
-    enabled: false,
   });
 }
 
 export function useAskDoubt() {
   return useMutation({
-    mutationFn: async (_doubt: string): Promise<string> => {
-      throw new Error('Backend implementation not available yet');
+    mutationFn: async (question: string) => {
+      // Simulate AI response with parliamentary language
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return `The honourable member has raised a most pertinent inquiry. In response to the distinguished question posed, I respectfully submit the following clarification:
+
+The matter under consideration requires careful examination of the fundamental principles involved. It is my considered opinion that a systematic approach would be most beneficial in addressing this concern.
+
+I would humbly recommend that the honourable member consider reviewing the relevant materials and, should further clarification be required, I remain at your disposal to provide additional guidance.
+
+With utmost respect and in the spirit of collaborative learning, I trust this response adequately addresses the inquiry presented.`;
     },
   });
 }
 
 export function useProvideAIGuidance() {
-  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (_params: { doubt: string; context: string }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['aiPerformanceReviews'] });
-    },
-  });
-}
-
-export function useGetHappinessScore() {
-  return useQuery<number>({
-    queryKey: ['happinessScore'],
-    queryFn: async () => 75,
-    enabled: false,
-  });
-}
-
-export function useGetResolvedProblemsCount() {
-  const { data: educationalData } = useGetEducationalData();
-  return useQuery<bigint>({
-    queryKey: ['resolvedProblemsCount'],
-    queryFn: () => educationalData?.resolvedProblems || BigInt(0),
-    enabled: !!educationalData,
-  });
-}
-
-export function useRequestPermission() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (_params: { requestId: string; requestType: PermissionType; reason: string; parent: Principal }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingPermissions'] });
-    },
-  });
-}
-
-export function useGetPendingPermissions() {
-  return useQuery<any[]>({
-    queryKey: ['pendingPermissions'],
-    queryFn: async () => [],
-    enabled: false,
-  });
-}
-
-export function useApprovePermission() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (_params: { requestId: string; approved: boolean }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingPermissions'] });
-    },
-  });
-}
-
-export function useGetFightCounters() {
-  return useQuery<{ fightsSolved: number; fightsCreated: number }>({
-    queryKey: ['fightCounters'],
-    queryFn: async () => ({ fightsSolved: 0, fightsCreated: 0 }),
-    enabled: false,
-  });
-}
-
-export function useUpdateFightCounters() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (_params: { fightsSolved?: number; fightsCreated?: number }) => {
-      throw new Error('Backend implementation not available yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fightCounters'] });
+    mutationFn: async (data: any) => {
+      // Placeholder for AI guidance
+      return;
     },
   });
 }

@@ -29,6 +29,11 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const PermissionType = IDL.Variant({
+  'goOut' : IDL.Null,
+  'playGames' : IDL.Null,
+  'watchYouTube' : IDL.Null,
+});
 export const Role = IDL.Variant({ 'child' : IDL.Null, 'parent' : IDL.Null });
 export const FamilyInvitation = IDL.Record({
   'created' : IDL.Int,
@@ -60,6 +65,7 @@ export const Location = IDL.Record({
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserProfile = IDL.Record({
+  'aiRemedyEnabled' : IDL.Bool,
   'displayName' : IDL.Text,
   'role' : IDL.Opt(Role),
   'lastUpdate' : IDL.Int,
@@ -87,6 +93,15 @@ export const Message = IDL.Record({
   'timestamp' : IDL.Int,
   'chatType' : ChatType,
   'recipientId' : IDL.Opt(IDL.Principal),
+});
+export const PermissionRequest = IDL.Record({
+  'id' : IDL.Text,
+  'child' : IDL.Principal,
+  'granted' : IDL.Bool,
+  'timestamp' : IDL.Int,
+  'requestType' : PermissionType,
+  'parent' : FamilyMember,
+  'reason' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
@@ -126,8 +141,13 @@ export const idlService = IDL.Service({
       [IDL.Text],
       [],
     ),
+  'createPermissionRequest' : IDL.Func(
+      [IDL.Principal, PermissionType, IDL.Text],
+      [IDL.Text],
+      [],
+    ),
   'createProfile' : IDL.Func([IDL.Text, Role], [], []),
-  'deleteAccount' : IDL.Func([], [], []),
+  'getAIRemedyEnabled' : IDL.Func([], [IDL.Bool], ['query']),
   'getActiveFamilyInvitations' : IDL.Func(
       [],
       [IDL.Vec(FamilyInvitation)],
@@ -136,15 +156,25 @@ export const idlService = IDL.Service({
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getExpenseSummary' : IDL.Func([], [Expenses], ['query']),
+  'getFightsCreated' : IDL.Func([], [IDL.Nat], ['query']),
+  'getFightsSolved' : IDL.Func([], [IDL.Nat], ['query']),
   'getMessageHistory' : IDL.Func([], [IDL.Vec(Message)], ['query']),
+  'getPermissionRequests' : IDL.Func(
+      [],
+      [IDL.Vec(PermissionRequest)],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'incrementFightsCreated' : IDL.Func([], [], []),
+  'incrementFightsSolved' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'removeChild' : IDL.Func([IDL.Principal], [], []),
   'removeParent' : IDL.Func([IDL.Principal], [], []),
+  'respondToPermissionRequest' : IDL.Func([IDL.Text, IDL.Bool], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'sendMessage' : IDL.Func(
       [
@@ -158,6 +188,7 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
+  'setAIRemedyEnabled' : IDL.Func([IDL.Bool], [], []),
   'updateUserProfile' : IDL.Func([UserProfile], [], []),
   'validateFamilyInvitationToken' : IDL.Func(
       [IDL.Text, IDL.Principal],
@@ -190,6 +221,11 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const PermissionType = IDL.Variant({
+    'goOut' : IDL.Null,
+    'playGames' : IDL.Null,
+    'watchYouTube' : IDL.Null,
+  });
   const Role = IDL.Variant({ 'child' : IDL.Null, 'parent' : IDL.Null });
   const FamilyInvitation = IDL.Record({
     'created' : IDL.Int,
@@ -221,6 +257,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserProfile = IDL.Record({
+    'aiRemedyEnabled' : IDL.Bool,
     'displayName' : IDL.Text,
     'role' : IDL.Opt(Role),
     'lastUpdate' : IDL.Int,
@@ -248,6 +285,15 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : IDL.Int,
     'chatType' : ChatType,
     'recipientId' : IDL.Opt(IDL.Principal),
+  });
+  const PermissionRequest = IDL.Record({
+    'id' : IDL.Text,
+    'child' : IDL.Principal,
+    'granted' : IDL.Bool,
+    'timestamp' : IDL.Int,
+    'requestType' : PermissionType,
+    'parent' : FamilyMember,
+    'reason' : IDL.Text,
   });
   
   return IDL.Service({
@@ -287,8 +333,13 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Text],
         [],
       ),
+    'createPermissionRequest' : IDL.Func(
+        [IDL.Principal, PermissionType, IDL.Text],
+        [IDL.Text],
+        [],
+      ),
     'createProfile' : IDL.Func([IDL.Text, Role], [], []),
-    'deleteAccount' : IDL.Func([], [], []),
+    'getAIRemedyEnabled' : IDL.Func([], [IDL.Bool], ['query']),
     'getActiveFamilyInvitations' : IDL.Func(
         [],
         [IDL.Vec(FamilyInvitation)],
@@ -297,15 +348,25 @@ export const idlFactory = ({ IDL }) => {
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getExpenseSummary' : IDL.Func([], [Expenses], ['query']),
+    'getFightsCreated' : IDL.Func([], [IDL.Nat], ['query']),
+    'getFightsSolved' : IDL.Func([], [IDL.Nat], ['query']),
     'getMessageHistory' : IDL.Func([], [IDL.Vec(Message)], ['query']),
+    'getPermissionRequests' : IDL.Func(
+        [],
+        [IDL.Vec(PermissionRequest)],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'incrementFightsCreated' : IDL.Func([], [], []),
+    'incrementFightsSolved' : IDL.Func([], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'removeChild' : IDL.Func([IDL.Principal], [], []),
     'removeParent' : IDL.Func([IDL.Principal], [], []),
+    'respondToPermissionRequest' : IDL.Func([IDL.Text, IDL.Bool], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'sendMessage' : IDL.Func(
         [
@@ -319,6 +380,7 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
+    'setAIRemedyEnabled' : IDL.Func([IDL.Bool], [], []),
     'updateUserProfile' : IDL.Func([UserProfile], [], []),
     'validateFamilyInvitationToken' : IDL.Func(
         [IDL.Text, IDL.Principal],

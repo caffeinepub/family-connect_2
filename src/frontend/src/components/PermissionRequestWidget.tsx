@@ -3,77 +3,81 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Label } from './ui/label';
 import { Loader2, Send } from 'lucide-react';
-import { useRequestPermission, type PermissionType } from '../hooks/useQueries';
+import { useGetCallerUserProfile } from '../hooks/useQueries';
+import { useActor } from '../hooks/useActor';
 import { Principal } from '@dfinity/principal';
 import { toast } from 'sonner';
+import { PermissionType } from '../backend';
 
 export default function PermissionRequestWidget() {
-  const [activityType, setActivityType] = useState<PermissionType | ''>('');
+  const { data: userProfile } = useGetCallerUserProfile();
+  const { actor } = useActor();
+  const [activityType, setActivityType] = useState<string>('');
   const [reason, setReason] = useState('');
-  const [parentPrincipal, setParentPrincipal] = useState('');
-  const requestPermission = useRequestPermission();
+  const [selectedParentPrincipal, setSelectedParentPrincipal] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Debug logging when component mounts/unmounts
-  useEffect(() => {
-    console.log('🎫 [PermissionRequestWidget] Component mounted - user is child');
-    return () => {
-      console.log('🎫 [PermissionRequestWidget] Component unmounted');
-    };
-  }, []);
+  const parents = userProfile?.parents || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activityType || !reason.trim() || !parentPrincipal.trim()) {
-      console.warn('⚠️ [PermissionRequestWidget] Form incomplete:', {
-        activityType,
-        reason: reason.trim(),
-        parentPrincipal: parentPrincipal.trim(),
-      });
+    if (!activityType || !reason.trim() || !selectedParentPrincipal) {
+      toast.error('Please fill in all fields');
       return;
     }
 
-    try {
-      const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      console.log('📤 [PermissionRequestWidget] Submitting request:', {
-        requestId,
-        requestType: activityType,
-        reason: reason.trim(),
-        parent: parentPrincipal.trim(),
-      });
+    if (!actor) {
+      toast.error('Not connected to backend');
+      return;
+    }
 
-      await requestPermission.mutateAsync({
-        requestId,
-        requestType: activityType as PermissionType,
-        reason: reason.trim(),
-        parent: Principal.fromText(parentPrincipal.trim()),
-      });
+    setIsSubmitting(true);
+    try {
+      const parentPrincipal = Principal.fromText(selectedParentPrincipal);
       
-      console.log('✅ [PermissionRequestWidget] Request submitted successfully');
+      let permissionType: PermissionType;
+      if (activityType === 'goOut') permissionType = PermissionType.goOut;
+      else if (activityType === 'playGames') permissionType = PermissionType.playGames;
+      else permissionType = PermissionType.watchYouTube;
+
+      await actor.createPermissionRequest(
+        parentPrincipal,
+        permissionType,
+        reason.trim()
+      );
+      
       toast.success('Permission request sent!');
       
       // Reset form
       setActivityType('');
       setReason('');
-      setParentPrincipal('');
-    } catch (error) {
-      console.error('❌ [PermissionRequestWidget] Failed to request permission:', error);
-      toast.error('Failed to send request. Please check the parent principal ID.');
+      setSelectedParentPrincipal('');
+    } catch (error: any) {
+      console.error('Failed to request permission:', error);
+      toast.error(error.message || 'Failed to send request');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const getActivityLabel = (type: PermissionType | string) => {
-    switch (type) {
-      case 'goOut':
-        return 'Go Out';
-      case 'playGames':
-        return 'Play Games';
-      case 'watchYouTube':
-        return 'Watch YouTube';
-      default:
-        return type;
-    }
-  };
+  if (parents.length === 0) {
+    return (
+      <Card className="border-warm-200 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg text-warm-900 dark:text-warm-100">
+            Request Permission
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            You need to connect with a parent first. Ask them to send you an invitation link from Settings.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-warm-200 shadow-md">
@@ -85,12 +89,9 @@ export default function PermissionRequestWidget() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Activity Type</label>
-            <Select value={activityType} onValueChange={(value) => {
-              console.log('📝 [PermissionRequestWidget] Activity type changed:', value);
-              setActivityType(value as PermissionType);
-            }}>
-              <SelectTrigger className="border-warm-200">
+            <Label htmlFor="activityType">Activity Type</Label>
+            <Select value={activityType} onValueChange={setActivityType}>
+              <SelectTrigger id="activityType" className="border-warm-200">
                 <SelectValue placeholder="Select activity" />
               </SelectTrigger>
               <SelectContent>
@@ -102,19 +103,25 @@ export default function PermissionRequestWidget() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Parent Principal ID</label>
-            <input
-              type="text"
-              placeholder="Enter parent's principal ID"
-              value={parentPrincipal}
-              onChange={(e) => setParentPrincipal(e.target.value)}
-              className="w-full px-3 py-2 border border-warm-200 rounded-md text-sm"
-            />
+            <Label htmlFor="parent">Select Parent</Label>
+            <Select value={selectedParentPrincipal} onValueChange={setSelectedParentPrincipal}>
+              <SelectTrigger id="parent" className="border-warm-200">
+                <SelectValue placeholder="Choose a parent" />
+              </SelectTrigger>
+              <SelectContent>
+                {parents.map((parent) => (
+                  <SelectItem key={parent.principal.toString()} value={parent.principal.toString()}>
+                    {parent.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Reason</label>
+            <Label htmlFor="reason">Reason</Label>
             <Textarea
+              id="reason"
               placeholder="Explain why you need permission..."
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -124,10 +131,10 @@ export default function PermissionRequestWidget() {
 
           <Button
             type="submit"
-            className="w-full"
-            disabled={!activityType || !reason.trim() || !parentPrincipal.trim() || requestPermission.isPending}
+            className="w-full bg-warm-500 hover:bg-warm-600"
+            disabled={!activityType || !reason.trim() || !selectedParentPrincipal || isSubmitting}
           >
-            {requestPermission.isPending ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Sending...

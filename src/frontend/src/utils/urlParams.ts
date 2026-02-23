@@ -206,22 +206,3 @@ export function getSecretFromHash(paramName: string): string | null {
 export function getSecretParameter(paramName: string): string | null {
     return getSecretFromHash(paramName);
 }
-
-/**
- * Gets the invitation token from the URL
- * Checks both regular query params and hash-based routing
- *
- * @returns The invitation token if found, null otherwise
- */
-export function getInvitationTokenFromURL(): string | null {
-    return getUrlParameter('inviteToken');
-}
-
-/**
- * Clears the invitation token from the URL
- * Removes it from both the URL and any session storage
- */
-export function clearInvitationTokenFromURL(): void {
-    clearParamFromHash('inviteToken');
-    clearSessionParameter('inviteToken');
-}

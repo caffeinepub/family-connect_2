@@ -1,93 +1,141 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
-import { useGetPendingPermissions, useApprovePermission } from '../hooks/useQueries';
+import { CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { useActor } from '../hooks/useActor';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import type { PermissionRequest } from '../backend';
 
 export default function PermissionApprovalInterface() {
-  const { data: permissions, isLoading } = useGetPendingPermissions();
-  const approvePermission = useApprovePermission();
+  const { actor, isFetching: actorFetching } = useActor();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    console.log('🔍 [PermissionApprovalInterface] Component mounted');
-    return () => {
-      console.log('🔍 [PermissionApprovalInterface] Component unmounted');
-    };
-  }, []);
+  const { data: permissionRequests, isLoading } = useQuery<PermissionRequest[]>({
+    queryKey: ['permissionRequests'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getPermissionRequests();
+    },
+    enabled: !!actor && !actorFetching,
+    refetchInterval: 5000,
+  });
 
-  const handleApprove = async (requestId: string, approved: boolean) => {
-    try {
-      await approvePermission.mutateAsync({ requestId, approved });
-      toast.success(approved ? 'Permission approved' : 'Permission denied');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to process permission');
-    }
+  const respondMutation = useMutation({
+    mutationFn: async ({ requestId, granted }: { requestId: string; granted: boolean }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.respondToPermissionRequest(requestId, granted);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['permissionRequests'] });
+      toast.success(variables.granted ? 'Permission granted!' : 'Permission denied');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to process request');
+    },
+  });
+
+  const handleApprove = async (requestId: string, approve: boolean) => {
+    await respondMutation.mutateAsync({ requestId, granted: approve });
   };
 
-  if (isLoading) {
-    return (
-      <Card className="border-warm-200 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg">Permission Requests</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-4">Loading...</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getActivityLabel = (type: any) => {
+    if (typeof type === 'object') {
+      if ('goOut' in type) return 'Go Out';
+      if ('playGames' in type) return 'Play Games';
+      if ('watchYouTube' in type) return 'Watch YouTube';
+    }
+    return String(type);
+  };
+
+  const formatTimestamp = (timestamp: bigint): string => {
+    const date = new Date(Number(timestamp) / 1000000);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  const pendingRequests = permissionRequests?.filter(req => !req.granted) || [];
 
   return (
     <Card className="border-warm-200 shadow-md">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Clock className="h-5 w-5 text-warm-500" />
-          Permission Requests
+        <CardTitle className="text-lg text-warm-900 dark:text-warm-100 flex items-center justify-between">
+          <span>Permission Requests</span>
+          {pendingRequests.length > 0 && (
+            <Badge variant="destructive" className="ml-2">
+              {pendingRequests.length}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {!permissions || permissions.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No pending permission requests
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {permissions.map((request: any) => (
-              <div key={request.id} className="border border-warm-200 rounded-lg p-4 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <Badge variant="outline" className="mb-2">
-                      {request.requestType}
-                    </Badge>
-                    <p className="text-sm font-medium">{request.childName}</p>
-                    <p className="text-sm text-muted-foreground">{request.reason}</p>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
+          </div>
+        ) : pendingRequests.length > 0 ? (
+          <div className="space-y-4">
+            {pendingRequests.map((request) => (
+              <div
+                key={request.id}
+                className="p-4 border border-warm-200 rounded-lg bg-warm-50 dark:bg-warm-900"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs">
+                        {getActivityLabel(request.requestType)}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        <Clock className="inline h-3 w-3 mr-1" />
+                        {formatTimestamp(request.timestamp)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground mt-2">{request.reason}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      From: {request.child.toString().slice(0, 10)}...
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
+                    variant="default"
                     onClick={() => handleApprove(request.id, true)}
-                    disabled={approvePermission.isPending}
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    disabled={respondMutation.isPending}
+                    className="flex-1 bg-warm-500 hover:bg-warm-600"
                   >
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="mr-1 h-4 w-4" />
                     Approve
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
                     onClick={() => handleApprove(request.id, false)}
-                    disabled={approvePermission.isPending}
+                    disabled={respondMutation.isPending}
                     className="flex-1"
                   >
-                    <XCircle className="h-4 w-4 mr-2" />
+                    <XCircle className="mr-1 h-4 w-4" />
                     Deny
                   </Button>
                 </div>
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">
+              No pending permission requests
+            </p>
           </div>
         )}
       </CardContent>

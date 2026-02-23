@@ -5,13 +5,16 @@ import { Input } from '../components/ui/input';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { useGetMessages, useSendMessage, useGetCallerUserProfile, type Message } from '../hooks/useQueries';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/label';
+import { useGetMessages, useSendMessage, useGetCallerUserProfile, useGetAIRemedyEnabled, useSetAIRemedyEnabled } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Principal } from '@dfinity/principal';
-import { Loader2, Send, MessageCircle, ShoppingCart, Link as LinkIcon, MessageSquare, X, Plus, Users } from 'lucide-react';
+import { Loader2, Send, MessageCircle, ShoppingCart, Link as LinkIcon, MessageSquare, X, Plus, Users, Sparkles } from 'lucide-react';
 import AIConflictAnalysis from '../components/AIConflictAnalysis';
 import { Role, MessageType, ChatType } from '../backend';
 import { toast } from 'sonner';
+import type { Message } from '../hooks/useQueries';
 
 type MessageTypeOption = 'text' | 'groceryList' | 'socialMediaLink';
 type ChatTypeOption = 'group' | 'private';
@@ -32,6 +35,8 @@ export default function Chat() {
   
   const { identity } = useInternetIdentity();
   const { data: currentUserProfile } = useGetCallerUserProfile();
+  const { data: aiRemedyEnabled, isLoading: aiToggleLoading } = useGetAIRemedyEnabled();
+  const setAIRemedy = useSetAIRemedyEnabled();
   
   // Fetch messages based on chat type
   const recipientPrincipal = selectedUser && chatType === 'private' ? Principal.fromText(selectedUser) : undefined;
@@ -48,6 +53,15 @@ export default function Chat() {
     ...(currentUserProfile?.children || []),
   ];
 
+  const handleToggleAIRemedy = async (checked: boolean) => {
+    try {
+      await setAIRemedy.mutateAsync(checked);
+      toast.success(checked ? 'AI remedies enabled' : 'AI remedies disabled');
+    } catch (error) {
+      toast.error('Failed to update AI remedy setting');
+    }
+  };
+
   const handleSendTextMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim()) return;
@@ -61,9 +75,7 @@ export default function Chat() {
       text: messageText.trim(),
       messageType: MessageType.text,
       chatType: backendChatType,
-      recipientId: recipientPrincipal || null,
-      groceryItems: null,
-      socialMediaUrl: null,
+      recipientId: recipientPrincipal,
     });
     setMessageText('');
   };
@@ -95,8 +107,7 @@ export default function Chat() {
         messageType: MessageType.groceryList,
         groceryItems,
         chatType: backendChatType,
-        recipientId: recipientPrincipal || null,
-        socialMediaUrl: null,
+        recipientId: recipientPrincipal,
       });
       setGroceryItems([]);
       toast.success('Grocery list sent!');
@@ -133,8 +144,7 @@ export default function Chat() {
         messageType: MessageType.socialMediaLink,
         socialMediaUrl: socialMediaUrl.trim(),
         chatType: backendChatType,
-        recipientId: recipientPrincipal || null,
-        groceryItems: null,
+        recipientId: recipientPrincipal,
       });
       setSocialMediaUrl('');
       setUrlError('');
@@ -226,9 +236,29 @@ export default function Chat() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-warm-900 dark:text-warm-100 mb-2">Family Chat</h1>
-        <p className="text-muted-foreground">Stay connected with your family members</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-warm-900 dark:text-warm-100 mb-2">Family Chat</h1>
+          <p className="text-muted-foreground">Stay connected with your family members</p>
+        </div>
+        
+        {/* AI Remedy Toggle - Parent Only */}
+        {isParent && (
+          <div className="flex items-center gap-3 p-3 bg-warm-50 dark:bg-warm-900 rounded-lg border border-warm-200">
+            <Sparkles className="h-5 w-5 text-warm-500" />
+            <div className="flex items-center gap-2">
+              <Label htmlFor="ai-remedy-toggle" className="cursor-pointer text-sm font-medium">
+                AI Remedies
+              </Label>
+              <Switch
+                id="ai-remedy-toggle"
+                checked={aiRemedyEnabled || false}
+                onCheckedChange={handleToggleAIRemedy}
+                disabled={aiToggleLoading || setAIRemedy.isPending}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -281,46 +311,65 @@ export default function Chat() {
                 <>
                   <ScrollArea className="h-[400px] border border-warm-200 rounded-lg p-4 bg-warm-50 dark:bg-warm-950">
                     {messagesLoading ? (
-                      <div className="flex items-center justify-center h-full">
+                      <div className="flex justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
                       </div>
-                    ) : sortedMessages.length === 0 ? (
-                      <div className="flex items-center justify-center h-full">
-                        <p className="text-muted-foreground text-center">
-                          No messages yet. Start the conversation!
-                        </p>
-                      </div>
-                    ) : (
+                    ) : sortedMessages.length > 0 ? (
                       <div className="space-y-4">
-                        {sortedMessages.map((msg, idx) => {
-                          const isOwn = msg.author.toString() === identity?.getPrincipal().toString();
+                        {sortedMessages.map((msg, index) => {
+                          const isOwn = msg.author.toString() === identity.getPrincipal().toString();
                           return (
-                            <div key={idx} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                            <div
+                              key={index}
+                              className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                            >
                               {renderMessage(msg, isOwn)}
                             </div>
                           );
                         })}
                       </div>
+                    ) : (
+                      <p className="text-center text-muted-foreground py-12">
+                        {chatType === 'group' 
+                          ? 'No messages yet. Start the conversation!' 
+                          : 'No messages with this person yet. Say hello!'}
+                      </p>
                     )}
                   </ScrollArea>
 
                   {/* Message Type Selector */}
-                  <Tabs value={messageType} onValueChange={(value) => setMessageType(value as MessageTypeOption)}>
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="text">
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Text
-                      </TabsTrigger>
-                      <TabsTrigger value="groceryList">
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Grocery
-                      </TabsTrigger>
-                      <TabsTrigger value="socialMediaLink">
-                        <LinkIcon className="h-4 w-4 mr-2" />
-                        Link
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  <div className="flex gap-2 border-b border-warm-200 pb-3">
+                    <Button
+                      type="button"
+                      variant={messageType === 'text' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setMessageType('text')}
+                      className="flex items-center gap-2"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Text
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={messageType === 'groceryList' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setMessageType('groceryList')}
+                      className="flex items-center gap-2"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      Grocery List
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={messageType === 'socialMediaLink' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setMessageType('socialMediaLink')}
+                      className="flex items-center gap-2"
+                    >
+                      <LinkIcon className="h-4 w-4" />
+                      Link
+                    </Button>
+                  </div>
 
                   {/* Text Message Input */}
                   {messageType === 'text' && (
@@ -331,7 +380,7 @@ export default function Chat() {
                         onChange={(e) => setMessageText(e.target.value)}
                         className="flex-1 border-warm-200"
                       />
-                      <Button type="submit" disabled={sendMessage.isPending} className="bg-warm-500 hover:bg-warm-600">
+                      <Button type="submit" disabled={!messageText.trim() || sendMessage.isPending}>
                         {sendMessage.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
@@ -341,7 +390,7 @@ export default function Chat() {
                     </form>
                   )}
 
-                  {/* Grocery List Input */}
+                  {/* Grocery List Composer */}
                   {messageType === 'groceryList' && (
                     <div className="space-y-3">
                       <div className="flex gap-2">
@@ -349,46 +398,63 @@ export default function Chat() {
                           placeholder="Add grocery item..."
                           value={groceryInput}
                           onChange={(e) => setGroceryInput(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGroceryItem())}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddGroceryItem();
+                            }
+                          }}
                           className="flex-1 border-warm-200"
                         />
-                        <Button type="button" onClick={handleAddGroceryItem} variant="outline">
+                        <Button
+                          type="button"
+                          onClick={handleAddGroceryItem}
+                          disabled={!groceryInput.trim()}
+                          variant="outline"
+                        >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
+
                       {groceryItems.length > 0 && (
-                        <div className="border border-warm-200 rounded-lg p-3 space-y-2">
-                          {groceryItems.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between bg-warm-50 dark:bg-warm-900 p-2 rounded">
-                              <span className="text-sm">{item}</span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveGroceryItem(idx)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
+                        <div className="border border-warm-200 rounded-lg p-3 bg-warm-50 dark:bg-warm-950">
+                          <p className="text-sm font-semibold mb-2 text-warm-900 dark:text-warm-100">
+                            Items ({groceryItems.length}):
+                          </p>
+                          <ul className="space-y-2">
+                            {groceryItems.map((item, index) => (
+                              <li key={index} className="flex items-center justify-between text-sm">
+                                <span className="flex items-center gap-2">
+                                  <span className="text-warm-600 dark:text-warm-400">•</span>
+                                  {item}
+                                </span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveGroceryItem(index)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       )}
+
                       <Button
+                        type="button"
                         onClick={handleSendGroceryList}
-                        disabled={sendMessage.isPending || groceryItems.length === 0}
-                        className="w-full bg-warm-500 hover:bg-warm-600"
+                        disabled={groceryItems.length === 0 || sendMessage.isPending}
+                        className="w-full"
                       >
                         {sendMessage.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Sending...
-                          </>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         ) : (
-                          <>
-                            <Send className="mr-2 h-4 w-4" />
-                            Send Grocery List
-                          </>
+                          <ShoppingCart className="h-4 w-4 mr-2" />
                         )}
+                        Send Grocery List
                       </Button>
                     </div>
                   )}
@@ -396,32 +462,32 @@ export default function Chat() {
                   {/* Social Media Link Input */}
                   {messageType === 'socialMediaLink' && (
                     <div className="space-y-3">
-                      <Input
-                        placeholder="Enter URL (https://...)"
-                        value={socialMediaUrl}
-                        onChange={(e) => {
-                          setSocialMediaUrl(e.target.value);
-                          setUrlError('');
-                        }}
-                        className={`border-warm-200 ${urlError ? 'border-red-500' : ''}`}
-                      />
-                      {urlError && <p className="text-sm text-red-500">{urlError}</p>}
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Enter URL (e.g., https://example.com)"
+                          value={socialMediaUrl}
+                          onChange={(e) => {
+                            setSocialMediaUrl(e.target.value);
+                            setUrlError('');
+                          }}
+                          className={`border-warm-200 ${urlError ? 'border-red-500' : ''}`}
+                        />
+                        {urlError && (
+                          <p className="text-xs text-red-500">{urlError}</p>
+                        )}
+                      </div>
                       <Button
+                        type="button"
                         onClick={handleSendSocialMediaLink}
-                        disabled={sendMessage.isPending || !socialMediaUrl.trim()}
-                        className="w-full bg-warm-500 hover:bg-warm-600"
+                        disabled={!socialMediaUrl.trim() || sendMessage.isPending}
+                        className="w-full"
                       >
                         {sendMessage.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Sending...
-                          </>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         ) : (
-                          <>
-                            <Send className="mr-2 h-4 w-4" />
-                            Send Link
-                          </>
+                          <LinkIcon className="h-4 w-4 mr-2" />
                         )}
+                        Send Link
                       </Button>
                     </div>
                   )}

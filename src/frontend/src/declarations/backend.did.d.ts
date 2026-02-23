@@ -54,9 +54,22 @@ export interface Message {
 export type MessageType = { 'text' : null } |
   { 'socialMediaLink' : null } |
   { 'groceryList' : null };
+export interface PermissionRequest {
+  'id' : string,
+  'child' : Principal,
+  'granted' : boolean,
+  'timestamp' : bigint,
+  'requestType' : PermissionType,
+  'parent' : FamilyMember,
+  'reason' : string,
+}
+export type PermissionType = { 'goOut' : null } |
+  { 'playGames' : null } |
+  { 'watchYouTube' : null };
 export type Role = { 'child' : null } |
   { 'parent' : null };
 export interface UserProfile {
+  'aiRemedyEnabled' : boolean,
   'displayName' : string,
   'role' : [] | [Role],
   'lastUpdate' : bigint,
@@ -102,17 +115,27 @@ export interface _SERVICE {
   'addParent' : ActorMethod<[string, Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createFamilyInvitationToken' : ActorMethod<[Principal, bigint], string>,
+  'createPermissionRequest' : ActorMethod<
+    [Principal, PermissionType, string],
+    string
+  >,
   'createProfile' : ActorMethod<[string, Role], undefined>,
-  'deleteAccount' : ActorMethod<[], undefined>,
+  'getAIRemedyEnabled' : ActorMethod<[], boolean>,
   'getActiveFamilyInvitations' : ActorMethod<[], Array<FamilyInvitation>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getExpenseSummary' : ActorMethod<[], Expenses>,
+  'getFightsCreated' : ActorMethod<[], bigint>,
+  'getFightsSolved' : ActorMethod<[], bigint>,
   'getMessageHistory' : ActorMethod<[], Array<Message>>,
+  'getPermissionRequests' : ActorMethod<[], Array<PermissionRequest>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'incrementFightsCreated' : ActorMethod<[], undefined>,
+  'incrementFightsSolved' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'removeChild' : ActorMethod<[Principal], undefined>,
   'removeParent' : ActorMethod<[Principal], undefined>,
+  'respondToPermissionRequest' : ActorMethod<[string, boolean], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'sendMessage' : ActorMethod<
     [
@@ -125,6 +148,7 @@ export interface _SERVICE {
     ],
     undefined
   >,
+  'setAIRemedyEnabled' : ActorMethod<[boolean], undefined>,
   'updateUserProfile' : ActorMethod<[UserProfile], undefined>,
   'validateFamilyInvitationToken' : ActorMethod<[string, Principal], Principal>,
 }

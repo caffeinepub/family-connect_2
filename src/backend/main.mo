@@ -12,7 +12,9 @@ import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import Iter "mo:core/Iter";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -56,6 +58,7 @@ actor {
     parents : [FamilyMember];
     children : [FamilyMember];
     totalExpenses : Expenses;
+    aiRemedyEnabled : Bool;
   };
 
   public type Location = {
@@ -77,7 +80,7 @@ actor {
     reason : Text;
     granted : Bool;
     timestamp : Int;
-    parent : Principal;
+    parent : FamilyMember;
   };
 
   public type Update = {
@@ -496,8 +499,8 @@ actor {
   let aiPerformanceReviewsMap = Map.empty<Text, AIPerformanceReview>();
   let icTechnologyTipsMap = Map.empty<Text, ICTechnologyTip>();
 
-  var fightsSolved = 0 : Nat;
-  var fightsCreated = 0 : Nat;
+  var globalFightsSolved = 0 : Nat;
+  var globalFightsCreated = 0 : Nat;
 
   func isParent(caller : Principal) : Bool {
     switch (userProfiles.get(caller)) {
@@ -645,6 +648,7 @@ actor {
         totalGroceries = 0;
         totalOther = 0;
       };
+      aiRemedyEnabled = true;
     };
     educationalDataMap.add(caller, educationalData);
     userProfiles.add(caller, profile);
@@ -825,6 +829,89 @@ actor {
       case (null) { Runtime.trap("User profile not found") };
       case (?profile) { profile.totalExpenses };
     };
+  };
+
+  public shared ({ caller }) func createPermissionRequest(
+    parentPrincipal : Principal,
+    requestType : PermissionType,
+    reason : Text,
+  ) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create permission requests");
+    };
+
+    if (not isChild(caller)) {
+      Runtime.trap("Unauthorized: Only children can create permission requests");
+    };
+
+    if (not areFamilyMembers(caller, parentPrincipal)) {
+      Runtime.trap("Unauthorized: Can only request permission from your parents");
+    };
+
+    let parentProfile = switch (userProfiles.get(parentPrincipal)) {
+      case (null) { Runtime.trap("Parent profile not found") };
+      case (?profile) { profile };
+    };
+
+    if (not isParent(parentPrincipal)) {
+      Runtime.trap("Target user is not a parent");
+    };
+
+    let requestId = caller.toText().concat(parentPrincipal.toText()).concat(Time.now().toText());
+
+    let parentMember : FamilyMember = {
+      name = parentProfile.displayName;
+      principal = parentPrincipal;
+    };
+
+    let request : PermissionRequest = {
+      id = requestId;
+      child = caller;
+      requestType;
+      reason;
+      granted = false;
+      timestamp = Time.now();
+      parent = parentMember;
+    };
+
+    permissionRequests.add(requestId, request);
+    requestId;
+  };
+
+  public query ({ caller }) func getPermissionRequests() : async [PermissionRequest] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view permission requests");
+    };
+
+    let allRequests = permissionRequests.toArray().map(func((_, request)) { request });
+
+    let userRequests = allRequests.filter(func(request) {
+      request.child == caller or request.parent.principal == caller
+    });
+
+    userRequests;
+  };
+
+  public shared ({ caller }) func respondToPermissionRequest(requestId : Text, granted : Bool) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can respond to permission requests");
+    };
+
+    if (not isParent(caller)) {
+      Runtime.trap("Unauthorized: Only parents can respond to permission requests");
+    };
+
+    let request = switch (permissionRequests.get(requestId)) {
+      case (null) { Runtime.trap("Permission request not found") };
+      case (?req) { req };
+    };
+
+    if (request.parent.principal != caller) {
+      Runtime.trap("Unauthorized: Can only respond to requests directed to you");
+    };
+
+    let updatedRequest = { request with granted = granted };
+    permissionRequests.add(requestId, updatedRequest);
   };
 
   public shared ({ caller }) func createFamilyInvitationToken(child : Principal, validationTimeHours : Nat) : async Text {
@@ -1041,112 +1128,58 @@ actor {
     userMessages;
   };
 
-  public shared ({ caller }) func deleteAccount() : async () {
+  public query ({ caller }) func getFightsSolved() : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can delete accounts");
+      Runtime.trap("Unauthorized: Only users can access this feature");
+    };
+    globalFightsSolved;
+  };
+
+  public query ({ caller }) func getFightsCreated() : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access this feature");
+    };
+    globalFightsCreated;
+  };
+
+  public shared ({ caller }) func setAIRemedyEnabled(enabled : Bool) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access this feature");
     };
 
-    switch (userProfiles.get(caller)) {
-      case (null) {
-        Runtime.trap("User profile not found. No account to delete");
-      };
-      case (?_) {
-        // Remove user profile
-        userProfiles.remove(caller);
-
-        // Remove educational data
-        educationalDataMap.remove(caller);
-
-        // Remove all family connections related to caller
-        for ((principal, _) in userProfiles.entries()) {
-          let currentProfile = userProfiles.get(principal);
-          switch (currentProfile) {
-            case (null) { () };
-            case (?profile) {
-              let updatedParents = profile.parents.filter(func(parent) { parent.principal != caller });
-              let updatedChildren = profile.children.filter(func(child) { child.principal != caller });
-
-              userProfiles.add(
-                principal,
-                {
-                  profile with
-                  parents = updatedParents;
-                  children = updatedChildren
-                },
-              );
-            };
-          };
-        };
-
-        // Remove messages sent by caller or addressed to caller
-        let remainingMessages = messages.filter(func(message) { 
-          message.author != caller and (
-            switch (message.recipientId) {
-              case (null) { true };
-              case (?recipient) { recipient != caller };
-            }
-          )
-        });
-        messages.clear();
-        messages.addAll(remainingMessages.values());
-
-        // Remove updates created by caller
-        let remainingUpdates = updates.filter(func(update) { update.author != caller });
-        updates.clear();
-        updates.addAll(remainingUpdates.values());
-
-        // Remove media posts created by caller
-        let remainingMedia = mediaPosts.filter(func(media) { media.author != caller });
-        mediaPosts.clear();
-        mediaPosts.addAll(remainingMedia.values());
-
-        // Remove reminders created by caller
-        let remainingReminders = reminders.filter(func(reminder) { reminder.creator != caller });
-        reminders.clear();
-        reminders.addAll(remainingReminders.values());
-
-        // Remove permission requests where caller is child or parent
-        let permissionRequestsToRemove = permissionRequests.filter(
-          func(_id, request) {
-            request.child == caller or request.parent == caller
-          }
-        );
-        for ((id, _) in permissionRequestsToRemove.entries()) {
-          permissionRequests.remove(id);
-        };
-
-        // Remove invitations where caller is parent or child
-        for ((token, invitation) in invitationTokens.entries()) {
-          if (
-            invitation.childPrincipal == caller or invitation.parentPrincipal == caller
-          ) {
-            invitationTokens.remove(token);
-          };
-        };
-
-        // Remove any study materials or documents owned by the caller
-        let documentsToRemove = documentMetadataMap.filter(
-          func(_id, doc) {
-            doc.owner == caller
-          }
-        );
-        for ((id, _) in documentsToRemove.entries()) {
-          documentMetadataMap.remove(id);
-        };
-
-        // Remove parent feedback created by caller
-        let feedbackToRemove = parentFeedbackMap.filter(
-          func(_id, feedback) {
-            feedback.parentId == caller.toText()
-          }
-        );
-        for ((id, _) in feedbackToRemove.entries()) {
-          parentFeedbackMap.remove(id);
-        };
-
-        // Account deletion completed successfully - no trap, just return
-      };
+    let currentProfile = switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) { profile };
     };
+
+    let updatedProfile = { currentProfile with aiRemedyEnabled = enabled };
+    userProfiles.add(caller, updatedProfile);
+  };
+
+  public query ({ caller }) func getAIRemedyEnabled() : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access this feature");
+    };
+
+    let currentProfile = switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) { profile };
+    };
+
+    currentProfile.aiRemedyEnabled;
+  };
+
+  public shared ({ caller }) func incrementFightsSolved() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can increment fights solved");
+    };
+    globalFightsSolved += 1;
+  };
+
+  public shared ({ caller }) func incrementFightsCreated() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can increment fights created");
+    };
+    globalFightsCreated += 1;
   };
 };
-

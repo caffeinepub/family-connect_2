@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { useGetResolvedProblemsCount } from '../hooks/useQueries';
+import { useGetTotalProblemsSolved } from '../hooks/useQueries';
 import { Loader2, Trophy } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 export default function ProblemsSolvedWidget() {
-  const { data: resolvedCount, isLoading } = useGetResolvedProblemsCount();
+  const { data: totalCount, isLoading } = useGetTotalProblemsSolved();
 
-  const count = Number(resolvedCount || BigInt(0));
+  const count = Number(totalCount || BigInt(0));
 
   return (
     <Card className="border-warm-200 shadow-md">
@@ -39,7 +39,7 @@ export default function ProblemsSolvedWidget() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Educational doubts and problems successfully resolved
+              Family conflicts and educational problems successfully resolved
             </p>
           </div>
         )}

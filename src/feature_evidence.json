@@ -2,11 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-review-profilesetupmodal-and-chatwidget-components-for-improper-portal-usage-modal-rendering-or-floating-element-positioning-that-could-cause-dom-nesting-violations",
-      "featureTitle": "Review ProfileSetupModal and ChatWidget components for improper portal usage, modal rendering, or floating element positioning that could cause DOM nesting violations",
+      "featureId": "feature-add-a-widget-to-the-dashboard-that-displays-the-total-number-of-problems-solved-showing-a-count-that-can-be-updated-when-ai-remedies-are-applied-or-problems-are-marked-as-resolved",
+      "featureTitle": "Add a widget to the dashboard that displays the total number of problems solved, showing a count that can be updated when AI remedies are applied or problems are marked as resolved",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/ShareApp.tsx"
+        "frontend/src/components/ProblemsSolvedWidget.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,15 +18,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-127"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-test-the-application-end-to-end-after-fixes-to-ensure-error-185-is-completely-resolved-and-no-new-react-errors-are-introduced",
-      "featureTitle": "Test the application end-to-end after fixes to ensure error #185 is completely resolved and no new React errors are introduced",
+      "featureId": "feature-implement-ai-powered-chat-analysis-that-detects-problems-in-conversations-and-automatically-generates-remedy-suggestions-to-help-resolve-the-identified-issues",
+      "featureTitle": "Implement AI-powered chat analysis that detects problems in conversations and automatically generates remedy suggestions to help resolve the identified issues",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/components/AIConflictAnalysis.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/Chat.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -38,7 +40,30 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-129"
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-toggle-control-that-allows-users-to-enable-or-disable-the-ai-remedy-feature-preserving-their-preference-across-sessions",
+      "featureTitle": "Add a toggle control that allows users to enable or disable the AI remedy feature, preserving their preference across sessions",
+      "files": [
+        "frontend/src/components/AIConflictAnalysis.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/Chat.tsx",
+        "frontend/src/pages/Settings.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }
