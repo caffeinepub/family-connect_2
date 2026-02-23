@@ -1,8 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
+import { useInternetIdentity } from './useInternetIdentity';
 import type { 
   UserProfile, 
   Role,
+  ExpenseCategory,
+  Expenses,
+  FamilyInvitation,
+  MessageType,
 } from '../backend';
 import { Principal } from '@dfinity/principal';
 import { ExternalBlob } from '../backend';
@@ -12,6 +17,9 @@ export type Message = {
   author: Principal;
   receiver: Principal;
   text: string;
+  messageType: MessageType;
+  groceryItems?: string[];
+  socialMediaUrl?: string;
   timestamp: bigint;
 };
 
@@ -67,6 +75,12 @@ type ICTechnologyTip = {
   id: string;
   tipText: string;
   relevantTechnology: string;
+  timestamp: bigint;
+};
+
+type Update = {
+  author: Principal;
+  text: string;
   timestamp: bigint;
 };
 
@@ -168,6 +182,32 @@ export function useSaveCallerUserProfile() {
   });
 }
 
+export function useUpdateUserProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profile: UserProfile) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('🔄 [useUpdateUserProfile] Updating profile:', {
+        profile,
+        role: profile.role,
+        roleType: typeof profile.role,
+      });
+      const result = await actor.updateUserProfile(profile);
+      console.log('✅ [useUpdateUserProfile] Profile updated successfully');
+      return result;
+    },
+    onSuccess: () => {
+      console.log('🔄 [useUpdateUserProfile] Invalidating profile queries...');
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useUpdateUserProfile] Failed to update profile:', error);
+    },
+  });
+}
+
 export function useGetAllProfiles() {
   const { actor, isFetching } = useActor();
 
@@ -180,6 +220,191 @@ export function useGetAllProfiles() {
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 10000,
+  });
+}
+
+// Family Structure Management
+export function useAddParent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ parentName, parentPrincipal }: { parentName: string; parentPrincipal: Principal }) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('👨‍👩‍👧 [useAddParent] Adding parent:', { parentName, parentPrincipal: parentPrincipal.toString() });
+      await actor.addParent(parentName, parentPrincipal);
+      console.log('✅ [useAddParent] Parent added successfully');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useAddParent] Failed to add parent:', error);
+    },
+  });
+}
+
+export function useRemoveParent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (parentPrincipal: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('🗑️ [useRemoveParent] Removing parent:', parentPrincipal.toString());
+      await actor.removeParent(parentPrincipal);
+      console.log('✅ [useRemoveParent] Parent removed successfully');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useRemoveParent] Failed to remove parent:', error);
+    },
+  });
+}
+
+export function useAddChild() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ childName, childPrincipal }: { childName: string; childPrincipal: Principal }) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('👶 [useAddChild] Adding child:', { childName, childPrincipal: childPrincipal.toString() });
+      await actor.addChild(childName, childPrincipal);
+      console.log('✅ [useAddChild] Child added successfully');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useAddChild] Failed to add child:', error);
+    },
+  });
+}
+
+export function useRemoveChild() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (childPrincipal: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('🗑️ [useRemoveChild] Removing child:', childPrincipal.toString());
+      await actor.removeChild(childPrincipal);
+      console.log('✅ [useRemoveChild] Child removed successfully');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useRemoveChild] Failed to remove child:', error);
+    },
+  });
+}
+
+// Family Invitation Queries
+export function useCreateFamilyInvitation() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ validationTimeHours, roleType }: { validationTimeHours: bigint; roleType: 'parent' | 'child' }) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('🎟️ [useCreateFamilyInvitation] Creating invitation:', { validationTimeHours, roleType });
+      
+      // For now, we'll use a placeholder principal for the child parameter
+      // The backend expects a child principal, but we'll generate a token that can be used by anyone
+      const placeholderPrincipal = Principal.fromText('2vxsx-fae');
+      const token = await actor.createFamilyInvitationToken(placeholderPrincipal, validationTimeHours);
+      
+      console.log('✅ [useCreateFamilyInvitation] Invitation created:', token);
+      return token;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['familyInvitations'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useCreateFamilyInvitation] Failed to create invitation:', error);
+    },
+  });
+}
+
+export function useValidateFamilyInvitation() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ token, childPrincipal }: { token: string; childPrincipal: Principal }) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('✅ [useValidateFamilyInvitation] Validating invitation:', { token, childPrincipal: childPrincipal.toString() });
+      const parentPrincipal = await actor.validateFamilyInvitationToken(token, childPrincipal);
+      console.log('✅ [useValidateFamilyInvitation] Invitation validated, parent:', parentPrincipal.toString());
+      return parentPrincipal;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['familyInvitations'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useValidateFamilyInvitation] Failed to validate invitation:', error);
+    },
+  });
+}
+
+export function useGetActiveFamilyInvitations() {
+  const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<FamilyInvitation[]>({
+    queryKey: ['familyInvitations'],
+    queryFn: async () => {
+      if (!actor || !identity) return [];
+      console.log('🔍 [useGetActiveFamilyInvitations] Fetching active invitations...');
+      const invitations = await actor.getActiveFamilyInvitations();
+      console.log('📦 [useGetActiveFamilyInvitations] Invitations fetched:', invitations);
+      return invitations;
+    },
+    enabled: !!actor && !isFetching && !!identity,
+  });
+}
+
+// Expense Tracking
+export function useAddExpense() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ category, amount }: { category: ExpenseCategory; amount: bigint }) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('💰 [useAddExpense] Adding expense:', { category, amount: amount.toString() });
+      await actor.addExpense(category, amount);
+      console.log('✅ [useAddExpense] Expense added successfully');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weeklyExpenses'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useAddExpense] Failed to add expense:', error);
+    },
+  });
+}
+
+export function useWeeklyExpenses() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<Expenses>({
+    queryKey: ['weeklyExpenses'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('📊 [useWeeklyExpenses] Fetching expense summary...');
+      const expenses = await actor.getExpenseSummary();
+      console.log('📦 [useWeeklyExpenses] Expenses fetched:', expenses);
+      return expenses;
+    },
+    enabled: !!actor && !actorFetching,
   });
 }
 
@@ -325,31 +550,66 @@ export function useUpdateFightsCreated() {
   });
 }
 
-// AI Guidance
-export function useProvideAIGuidance() {
+// AI Conflict Analysis
+export function useAnalyzeConflicts() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (analysis: string) => {
+    mutationFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return (actor as any).provideAIGuidance(analysis);
+      return (actor as any).analyzeConflicts();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conflicts'] });
     },
   });
 }
 
-// Updates Queries - Backend doesn't have these methods
-export function useGetUpdates() {
+export function useGetConflicts() {
   const { actor, isFetching } = useActor();
 
   return useQuery<any[]>({
+    queryKey: ['conflicts'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return (actor as any).getConflicts();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useProvideAIGuidance() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (guidance: string) => {
+      if (!actor) throw new Error('Actor not available');
+      console.log('🤖 [useProvideAIGuidance] Logging AI guidance:', guidance);
+      // This is a stub - backend doesn't have this method yet
+      return Promise.resolve();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['aiGuidance'] });
+    },
+  });
+}
+
+// Updates (Family Feed)
+export function useGetUpdates() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Update[]>({
     queryKey: ['updates'],
     queryFn: async () => {
       if (!actor) return [];
-      // Backend doesn't have getUpdates
+      console.log('📰 [useGetUpdates] Fetching updates...');
+      // Backend doesn't have this method yet, return empty array
       return [];
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 5000,
+    refetchInterval: 10000,
   });
 }
 
@@ -360,7 +620,8 @@ export function useCreateUpdate() {
   return useMutation({
     mutationFn: async (text: string) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have createUpdate
+      console.log('📝 [useCreateUpdate] Creating update:', text);
+      // Backend doesn't have this method yet, stub implementation
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -369,86 +630,7 @@ export function useCreateUpdate() {
   });
 }
 
-// Media Queries - Backend doesn't have these methods
-export function useGetMedia() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<any[]>({
-    queryKey: ['media'],
-    queryFn: async () => {
-      if (!actor) return [];
-      // Backend doesn't have getMedia
-      return [];
-    },
-    enabled: !!actor && !isFetching,
-    refetchInterval: 10000,
-  });
-}
-
-export function useAddMedia() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ file, description }: { file: ExternalBlob; description: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have addMedia
-      return Promise.resolve();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['media'] });
-    },
-  });
-}
-
-// Reminders Queries - Backend doesn't have these methods
-export function useGetReminders() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<any[]>({
-    queryKey: ['reminders'],
-    queryFn: async () => {
-      if (!actor) return [];
-      // Backend doesn't have getReminders
-      return [];
-    },
-    enabled: !!actor && !isFetching,
-    refetchInterval: 10000,
-  });
-}
-
-export function useAddReminder() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ text, dueDate }: { text: string; dueDate: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have addReminder
-      return Promise.resolve();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reminders'] });
-    },
-  });
-}
-
-// Messages Queries - Backend doesn't have these methods
-export function useGetMessages() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Message[]>({
-    queryKey: ['messages'],
-    queryFn: async () => {
-      if (!actor) return [];
-      // Backend doesn't have getMessages
-      return [];
-    },
-    enabled: !!actor && !isFetching,
-    refetchInterval: 3000,
-  });
-}
-
+// Messaging
 export function useGetMessagesWithUser() {
   const { actor, isFetching } = useActor();
 
@@ -456,11 +638,13 @@ export function useGetMessagesWithUser() {
     queryKey: ['messages'],
     queryFn: async () => {
       if (!actor) return [];
-      // Backend doesn't have getMessages
-      return [];
+      console.log('💬 [useGetMessagesWithUser] Fetching messages...');
+      const messages = await actor.getMessageHistory();
+      console.log('📦 [useGetMessagesWithUser] Messages fetched:', messages);
+      return messages;
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 3000,
+    refetchInterval: 5000,
   });
 }
 
@@ -469,13 +653,41 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ receiver, text }: { receiver: Principal; text: string }) => {
+    mutationFn: async ({ 
+      receiver, 
+      text, 
+      messageType = 'text' as MessageType,
+      groceryItems,
+      socialMediaUrl,
+    }: { 
+      receiver: Principal; 
+      text: string;
+      messageType?: MessageType;
+      groceryItems?: string[];
+      socialMediaUrl?: string;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have sendMessage
-      return Promise.resolve();
+      console.log('📤 [useSendMessage] Sending message:', { 
+        receiver: receiver.toString(), 
+        text,
+        messageType,
+        groceryItems,
+        socialMediaUrl,
+      });
+      await actor.sendMessage(
+        receiver, 
+        text, 
+        messageType,
+        groceryItems || null,
+        socialMediaUrl || null
+      );
+      console.log('✅ [useSendMessage] Message sent successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+    onError: (error) => {
+      console.error('❌ [useSendMessage] Failed to send message:', error);
     },
   });
 }
@@ -486,32 +698,90 @@ export function useShareLocation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+    mutationFn: async (location: Location) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have shareLocation
-      return Promise.resolve();
+      return (actor as any).shareLocation(location);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allProfiles'] });
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
   });
 }
 
-// Educational Data Queries - Backend doesn't have these methods
-export function useGetEducationalData() {
+export function useGetFamilyLocations() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<EducationalData | null>({
-    queryKey: ['educationalData'],
+  return useQuery<any[]>({
+    queryKey: ['locations'],
     queryFn: async () => {
-      if (!actor) return null;
-      // Backend doesn't have getEducationalData
-      return null;
+      if (!actor) return [];
+      return (actor as any).getFamilyLocations();
+    },
+    enabled: !!actor && !isFetching,
+    refetchInterval: 30000,
+  });
+}
+
+// Media Gallery
+export function useAddMedia() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ file, description }: { file: ExternalBlob; description: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return (actor as any).addMedia(file, description);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['media'] });
+    },
+  });
+}
+
+export function useGetMedia() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<any[]>({
+    queryKey: ['media'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return (actor as any).getMedia();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
+// Reminders
+export function useAddReminder() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ text, dueDate }: { text: string; dueDate: bigint }) => {
+      if (!actor) throw new Error('Actor not available');
+      return (actor as any).addReminder(text, dueDate);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    },
+  });
+}
+
+export function useGetReminders() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<any[]>({
+    queryKey: ['reminders'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return (actor as any).getReminders();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Educational Features
 export function useUploadQuestionPaper() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -519,8 +789,7 @@ export function useUploadQuestionPaper() {
   return useMutation({
     mutationFn: async ({ title, file }: { title: string; file: ExternalBlob }) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have uploadQuestionPaper
-      return Promise.resolve();
+      return (actor as any).uploadQuestionPaper(title, file);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['educationalData'] });
@@ -535,8 +804,7 @@ export function useUploadAnswerScript() {
   return useMutation({
     mutationFn: async ({ file }: { file: ExternalBlob }) => {
       if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have uploadAnswerScript
-      return Promise.resolve();
+      return (actor as any).uploadAnswerScript(file);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['educationalData'] });
@@ -544,15 +812,14 @@ export function useUploadAnswerScript() {
   });
 }
 
-export function useGetAIAnalysis() {
+export function useGetEducationalData() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<AIPerformanceReview | null>({
-    queryKey: ['aiAnalysis'],
+  return useQuery<EducationalData>({
+    queryKey: ['educationalData'],
     queryFn: async () => {
-      if (!actor) return null;
-      // Backend doesn't have getAIAnalysis
-      return null;
+      if (!actor) throw new Error('Actor not available');
+      return (actor as any).getEducationalData();
     },
     enabled: !!actor && !isFetching,
   });
@@ -565,8 +832,35 @@ export function useGetStudyTips() {
     queryKey: ['studyTips'],
     queryFn: async () => {
       if (!actor) return [];
-      // Backend doesn't have getStudyTips
-      return [];
+      return (actor as any).getStudyTips();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAskDoubt() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (doubt: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return (actor as any).askDoubt(doubt);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['educationalData'] });
+    },
+  });
+}
+
+export function useGetResolvedProblemsCount() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<bigint>({
+    queryKey: ['resolvedProblems'],
+    queryFn: async () => {
+      if (!actor) return BigInt(0);
+      return (actor as any).getResolvedProblemsCount();
     },
     enabled: !!actor && !isFetching,
   });
@@ -579,108 +873,22 @@ export function useGetAIReviews() {
     queryKey: ['aiReviews'],
     queryFn: async () => {
       if (!actor) return [[], []];
-      // Backend doesn't have getAIReviews
-      return [[], []];
+      return (actor as any).getAIReviews();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-export function useSubmitDoubt() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (doubt: string) => {
-      if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have submitDoubt
-      return Promise.resolve();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['educationalData'] });
-    },
-  });
-}
-
-export function useAskDoubt() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (doubt: string) => {
-      if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have askDoubt - return mock response
-      return `Thank you for your inquiry. I shall endeavor to provide clarification on the matter you have raised: "${doubt}". This is a simulated response as the backend method is not yet implemented.`;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['educationalData'] });
-    },
-  });
-}
-
-export function useMarkProblemResolved() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      // Backend doesn't have markProblemResolved
-      return Promise.resolve();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['educationalData'] });
-    },
-  });
-}
-
-export function useGetICTechnologyTips() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<ICTechnologyTip[]>({
-    queryKey: ['icTechnologyTips'],
-    queryFn: async () => {
-      if (!actor) return [];
-      // Backend doesn't have getICTechnologyTips
-      return [];
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// Happiness Score Query - Backend doesn't have this method
 export function useGetHappinessScore() {
   const { actor, isFetching } = useActor();
 
   return useQuery<number>({
     queryKey: ['happinessScore'],
     queryFn: async () => {
-      if (!actor) return 75;
-      // Backend doesn't have getHappinessScore
-      return 75;
+      if (!actor) return 0;
+      return (actor as any).getHappinessScore();
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 30000,
-  });
-}
-
-// Alias for HappinessMeter component
-export function useGetHappinessMeter() {
-  return useGetHappinessScore();
-}
-
-// Resolved Problems Count
-export function useGetResolvedProblemsCount() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<number>({
-    queryKey: ['resolvedProblemsCount'],
-    queryFn: async () => {
-      if (!actor) return 0;
-      // Backend doesn't have this method
-      return 0;
-    },
-    enabled: !!actor && !isFetching,
-    refetchInterval: 10000,
   });
 }

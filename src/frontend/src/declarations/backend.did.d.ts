@@ -10,18 +10,56 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type ExpenseCategory = { 'other' : null } |
+  { 'fees' : null } |
+  { 'groceries' : null };
+export interface ExpenseEntry {
+  'timestamp' : bigint,
+  'category' : ExpenseCategory,
+  'amount' : bigint,
+}
+export interface Expenses {
+  'totalOther' : bigint,
+  'totalGroceries' : bigint,
+  'totalFees' : bigint,
+  'entries' : Array<ExpenseEntry>,
+}
 export type ExternalBlob = Uint8Array;
+export interface FamilyInvitation {
+  'created' : bigint,
+  'token' : string,
+  'expires' : bigint,
+  'parentPrincipal' : Principal,
+  'childPrincipal' : Principal,
+  'isValid' : boolean,
+}
+export interface FamilyMember { 'principal' : Principal, 'name' : string }
 export interface Location {
   'latitude' : number,
   'longitude' : number,
   'timestamp' : bigint,
 }
+export interface Message {
+  'socialMediaUrl' : [] | [string],
+  'text' : string,
+  'author' : Principal,
+  'messageType' : MessageType,
+  'groceryItems' : [] | [Array<string>],
+  'timestamp' : bigint,
+  'receiver' : Principal,
+}
+export type MessageType = { 'text' : null } |
+  { 'socialMediaLink' : null } |
+  { 'groceryList' : null };
 export type Role = { 'child' : null } |
   { 'parent' : null };
 export interface UserProfile {
   'displayName' : string,
   'role' : [] | [Role],
   'lastUpdate' : bigint,
+  'children' : Array<FamilyMember>,
+  'totalExpenses' : Expenses,
+  'parents' : Array<FamilyMember>,
   'location' : [] | [Location],
   'avatar' : [] | [ExternalBlob],
 }
@@ -56,13 +94,28 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addChild' : ActorMethod<[string, Principal], undefined>,
+  'addExpense' : ActorMethod<[ExpenseCategory, bigint], undefined>,
+  'addParent' : ActorMethod<[string, Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createFamilyInvitationToken' : ActorMethod<[Principal, bigint], string>,
   'createProfile' : ActorMethod<[string, Role], undefined>,
+  'getActiveFamilyInvitations' : ActorMethod<[], Array<FamilyInvitation>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getExpenseSummary' : ActorMethod<[], Expenses>,
+  'getMessageHistory' : ActorMethod<[], Array<Message>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'removeChild' : ActorMethod<[Principal], undefined>,
+  'removeParent' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'sendMessage' : ActorMethod<
+    [Principal, string, MessageType, [] | [Array<string>], [] | [string]],
+    undefined
+  >,
+  'updateUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'validateFamilyInvitationToken' : ActorMethod<[string, Principal], Principal>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

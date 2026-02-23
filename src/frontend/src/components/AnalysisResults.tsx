@@ -8,7 +8,8 @@ export default function AnalysisResults() {
   const { data: studyTips, isLoading: tipsLoading } = useGetStudyTips();
   const { data: aiReviews, isLoading: reviewsLoading } = useGetAIReviews();
 
-  const [performanceReviews, technologyTips] = aiReviews || [[], []];
+  const performanceReviews = aiReviews?.[0] || [];
+  const technologyTips = aiReviews?.[1] || [];
 
   const getAnalysisLevelLabel = (level: { basic?: null; intermediate?: null; advanced?: null }) => {
     if ('advanced' in level) return 'Advanced Analysis';

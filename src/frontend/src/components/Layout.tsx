@@ -3,7 +3,8 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from './ui/button';
-import { Home, Image, Bell, MapPin, MessageCircle, Heart, GraduationCap } from 'lucide-react';
+import { Home, Image, Bell, MapPin, MessageCircle, Heart, GraduationCap, Settings } from 'lucide-react';
+import ShareApp from './ShareApp';
 
 interface LayoutProps {
   children: ReactNode;
@@ -42,6 +43,7 @@ export default function Layout({ children }: LayoutProps) {
     { path: '/locations', label: 'Locations', icon: MapPin },
     { path: '/chat', label: 'Chat', icon: MessageCircle },
     { path: '/education', label: 'Education', icon: GraduationCap },
+    { path: '/settings', label: 'Settings', icon: Settings, authRequired: true },
   ];
 
   return (
@@ -50,15 +52,16 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <img 
-              src="/assets/generated/app-logo.dim_200x200.png" 
-              alt="FamilyHub Logo" 
+              src="/assets/generated/familyhub-logo.dim_200x200.png" 
+              alt="FamilyConnect Logo" 
               className="h-10 w-10 object-contain"
             />
-            <h1 className="text-xl font-bold text-warm-900 dark:text-warm-100">FamilyHub</h1>
+            <h1 className="text-xl font-bold text-warm-900 dark:text-warm-100">FamilyConnect</h1>
           </div>
           
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
+              if (item.authRequired && !isAuthenticated) return null;
               const Icon = item.icon;
               const isActive = currentPath === item.path;
               return (
@@ -76,14 +79,17 @@ export default function Layout({ children }: LayoutProps) {
             })}
           </nav>
 
-          <Button
-            onClick={handleAuth}
-            disabled={disabled}
-            variant={isAuthenticated ? 'outline' : 'default'}
-            size="sm"
-          >
-            {loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login'}
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAuthenticated && <ShareApp />}
+            <Button
+              onClick={handleAuth}
+              disabled={disabled}
+              variant={isAuthenticated ? 'outline' : 'default'}
+              size="sm"
+            >
+              {loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login'}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -93,11 +99,11 @@ export default function Layout({ children }: LayoutProps) {
         ) : (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
             <img 
-              src="/assets/generated/app-logo.dim_200x200.png" 
-              alt="FamilyHub Logo" 
+              src="/assets/generated/familyhub-logo.dim_200x200.png" 
+              alt="FamilyConnect Logo" 
               className="h-24 w-24 object-contain"
             />
-            <h2 className="text-3xl font-bold text-warm-900 dark:text-warm-100">Welcome to FamilyHub</h2>
+            <h2 className="text-3xl font-bold text-warm-900 dark:text-warm-100">Welcome to FamilyConnect</h2>
             <p className="text-lg text-muted-foreground max-w-md">
               Stay connected with your loved ones. Share updates, photos, locations, and messages all in one place.
             </p>
@@ -111,6 +117,7 @@ export default function Layout({ children }: LayoutProps) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-warm-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container flex items-center justify-around h-16">
           {navItems.map((item) => {
+            if (item.authRequired && !isAuthenticated) return null;
             const Icon = item.icon;
             const isActive = currentPath === item.path;
             return (
@@ -132,7 +139,7 @@ export default function Layout({ children }: LayoutProps) {
       <footer className="border-t border-warm-200 bg-warm-50 dark:bg-warm-950 py-6 mb-16 md:mb-0">
         <div className="container text-center text-sm text-muted-foreground">
           <p>
-            © {new Date().getFullYear()} FamilyHub. Built with{' '}
+            © {new Date().getFullYear()} FamilyConnect. Built with{' '}
             <Heart className="inline h-3 w-3 text-warm-500 fill-warm-500" /> using{' '}
             <a
               href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}

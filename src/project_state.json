@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "Family communication app with AI-powered question paper analysis, sentiment-based happiness meter, problem-solving tracking, family guidance with professional tone, permission management for children, and fight/conflict resolution tracking",
+  "projectStateVersion": 27,
+  "summary": "Family communication app with AI-powered question paper analysis, sentiment-based happiness meter, problem-solving tracking, family guidance with professional tone, permission management for children, fight/conflict resolution tracking, and weekly expense tracking with AI-powered analysis and recommendations",
   "architectural_notes": [
     "App requires real-time updates for location sharing and messaging",
     "Consider family-based user groups/circles for privacy",
@@ -18,7 +18,7 @@
     "Permission widget and parent/child role selection not visible or accessible in current deployment",
     "Role selection modal (parent/child options) not displaying on login in Version 6"
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "generatedImages": [
     {
       "filename": "Generated Image February 23, 2026 - 12:21PM.png",
@@ -273,6 +273,214 @@
         "REQ-39"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hooks-in-usequeries-ts-for-managing-family-structure-adding-parents-adding-children-removing-parents-and-removing-children",
+      "title": "Create React Query hooks in useQueries.ts for managing family structure: adding parents, adding children, removing parents, and removing children",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-settings-page-component-at-frontend-src-pages-settings-tsx-that-displays-the-authenticated-user-s-principal-id-prominently-at-the-top",
+      "title": "Create a Settings page component at frontend/src/pages/Settings.tsx that displays the authenticated user's principal ID prominently at the top",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-settings-page-display-a-parents-section-showing-all-parent-names-and-their-principal-ids-from-the-user-s-profile-with-ability-to-add-up-to-2-parents",
+      "title": "In the Settings page, display a 'Parents' section showing all parent names and their principal IDs from the user's profile with ability to add up to 2 parents",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-settings-page-display-a-children-section-showing-all-child-names-and-their-principal-ids-from-the-user-s-profile-with-ability-to-dynamically-add-more-children",
+      "title": "In the Settings page, display a 'Children' section showing all child names and their principal IDs from the user's profile with ability to dynamically add more children",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-settings-navigation-link-in-the-layout-component-header-that-routes-to-the-new-settings-page",
+      "title": "Add a 'Settings' navigation link in the Layout component header that routes to the new Settings page",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-query-hooks-in-usequeries-ts-for-adding-expense-entries-and-fetching-weekly-expense-data-from-the-backend",
+      "title": "Create React Query hooks in useQueries.ts for adding expense entries and fetching weekly expense data from the backend",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-expensechart-component-that-displays-weekly-expense-data-as-a-visual-chart-graph-with-separate-bars-or-sections-for-fees-groceries-and-other-expenses",
+      "title": "Create an ExpenseChart component that displays weekly expense data as a visual chart/graph with separate bars or sections for fees, groceries, and other expenses",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-expenseinput-component-for-parents-to-add-new-expense-entries-by-selecting-category-fees-groceries-other-and-entering-amount",
+      "title": "Create an ExpenseInput component for parents to add new expense entries by selecting category (fees, groceries, other) and entering amount",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-expenseanalysis-component-that-displays-ai-powered-tips-tricks-and-recommendations-for-reducing-spending-based-on-weekly-expense-patterns",
+      "title": "Create an ExpenseAnalysis component that displays AI-powered tips, tricks, and recommendations for reducing spending based on weekly expense patterns",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-the-expensechart-and-expenseanalysis-components-into-the-dashboard-page-so-expense-data-is-visible-to-both-parent-and-child-accounts",
+      "title": "Integrate the ExpenseChart and ExpenseAnalysis components into the Dashboard page so expense data is visible to both parent and child accounts",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-new-custom-logo-image-for-the-familyhub-application-with-a-warm-family-friendly-design-that-represents-family-communication-and-educational-support",
+      "title": "Generate a new custom logo image for the FamilyHub application with a warm, family-friendly design that represents family communication and educational support",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-layout-component-header-to-display-the-newly-generated-familyhub-logo-image-as-a-static-asset-from-frontend-public-assets-generated",
+      "title": "Update the Layout component header to display the newly generated FamilyHub logo image as a static asset from frontend/public/assets/generated",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-all-dollar-sign-currency-symbols-with-indian-rupee-symbols-throughout-the-application-including-the-expensechart-expenseinput-expenseanalysis-and-dashboard-components",
+      "title": "Replace all dollar sign ($) currency symbols with Indian Rupee symbols (₹) throughout the application including the ExpenseChart, ExpenseInput, ExpenseAnalysis, and Dashboard components",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-application-title-in-frontend-index-html-from-familyhub-to-a-new-distinctive-name-that-better-reflects-the-family-communication-and-educational-support-features",
+      "title": "Update the application title in frontend/index.html from 'FamilyHub' to a new distinctive name that better reflects the family communication and educational support features",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-principal-id-display-from-the-settings-page-to-simplify-the-user-interface-and-make-family-management-more-user-friendly",
+      "title": "Remove the Principal ID display from the Settings page to simplify the user interface and make family management more user-friendly",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-shareapp-component-that-displays-a-prominent-share-app-button-with-a-sharing-icon-and-when-clicked-opens-a-modal-or-dialog-showing-the-deployment-url-with-a-copy-button-and-platform-specific-sharing-options-copy-link-share-via-text-email",
+      "title": "Create a ShareApp component that displays a prominent 'Share App' button with a sharing icon, and when clicked, opens a modal or dialog showing the deployment URL with a copy button and platform-specific sharing options (copy link, share via text/email)",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-settings-page-family-management-interface-to-use-a-simplified-invitation-workflow-where-users-can-generate-invitation-codes-or-links-instead-of-manually-entering-principal-ids-making-it-easier-to-connect-family-members",
+      "title": "Redesign the Settings page family management interface to use a simplified invitation workflow where users can generate invitation codes or links instead of manually entering Principal IDs, making it easier to connect family members",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-layout-component-to-include-the-shareapp-button-in-the-header-navigation-alongside-existing-navigation-links-ensuring-it-is-accessible-from-all-pages",
+      "title": "Update the Layout component to include the ShareApp button in the header navigation alongside existing navigation links, ensuring it is accessible from all pages",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-role-change-option-in-the-settings-page-that-allows-users-with-parent-role-to-switch-to-child-role",
+      "title": "Add a role change option in the Settings page that allows users with 'parent' role to switch to 'child' role",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-prevent-users-with-child-role-from-accessing-any-role-change-functionality-to-switch-to-parent-role",
+      "title": "Prevent users with 'child' role from accessing any role change functionality to switch to 'parent' role",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-usesendmessage-mutation-hook-in-frontend-src-hooks-usequeries-ts-to-support-sending-messages-with-messagetype-groceryitems-array-and-socialmediaurl-parameters",
+      "title": "Update the useSendMessage mutation hook in frontend/src/hooks/useQueries.ts to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-grocery-list-composer-ui-in-the-chat-page-frontend-src-pages-chat-tsx-that-allows-users-to-add-multiple-grocery-items-to-a-list-with-an-input-field-and-add-remove-buttons-then-send-the-complete-list-as-a-single-message",
+      "title": "Add a grocery list composer UI in the Chat page (frontend/src/pages/Chat.tsx) that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-social-media-link-input-field-in-the-chat-page-frontend-src-pages-chat-tsx-that-accepts-urls-and-sends-them-as-socialmedialink-messages-with-basic-url-validation",
+      "title": "Add a social media link input field in the Chat page (frontend/src/pages/Chat.tsx) that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-message-display-logic-in-chat-tsx-to-render-grocery-list-messages-as-formatted-lists-with-checkboxes-or-bullet-points-showing-all-items-in-the-groceryitems-array",
+      "title": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-message-display-logic-in-chat-tsx-to-render-social-media-link-messages-with-link-preview-cards-showing-the-url-as-a-clickable-hyperlink-that-opens-in-a-new-tab",
+      "title": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-message-type-selector-or-toggle-buttons-in-the-chat-page-ui-that-allows-users-to-switch-between-sending-regular-text-messages-grocery-lists-and-social-media-links",
+      "title": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
+      "reqIds": [
+        "REQ-80"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -510,6 +718,229 @@
       "summary": "Verify the backend getUserProfile method in main.mo correctly returns the complete UserProfile object including the role field for authenticated users",
       "reqIds": [
         "REQ-40"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Display principal/canister ID in settings widget",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Support multiple parents (up to 2) in family structure",
+      "reqIds": [
+        "AR-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-52",
+      "summary": "Allow parents to dynamically add/increase number of children in family",
+      "reqIds": [
+        "AR-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Display all parent names in settings widget",
+      "reqIds": [
+        "AR-51"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Display all child names in settings widget",
+      "reqIds": [
+        "AR-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Update the UserProfile data model in backend/main.mo to support multiple parents (up to 2) by adding a parents field as an array of parent profile objects containing name and principal ID",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Update the UserProfile data model in backend/main.mo to support a dynamic number of children by adding a children field as an array of child profile objects containing name and principal ID",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Create backend methods in main.mo to add parent profiles to the authenticated user's family structure, including validation to enforce maximum of 2 parents",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Create backend methods in main.mo to add child profiles to the authenticated user's family structure with no upper limit",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Create backend methods in main.mo to remove parent and child profiles from the authenticated user's family structure by principal ID",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-60",
+      "summary": "Weekly expense tracking system for parents with categories (fees, groceries, other expenses)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-61",
+      "summary": "Expense chart/graph display in both parent and child accounts showing weekly spending breakdown",
+      "reqIds": [
+        "AR-60"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-62",
+      "summary": "AI-powered expense analysis providing tips, tricks, and recommendations to reduce spending based on weekly expense patterns",
+      "reqIds": [
+        "AR-60",
+        "AR-61"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-63",
+      "summary": "Update the UserProfile data model in backend/main.mo to include an expenses field that stores weekly expense entries with categories (fees, groceries, other), amounts, and timestamps",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-64",
+      "summary": "Create backend methods in main.mo for parents to add weekly expense entries with category (fees, groceries, other expenses) and amount",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-65",
+      "summary": "Create backend method in main.mo to retrieve weekly expense data grouped by category, returning totals for fees, groceries, and other expenses",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-66",
+      "summary": "Change application logo to a new design",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-67",
+      "summary": "Update currency display from USD ($) to Indian Rupees (₹) throughout the application",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-68",
+      "summary": "Remove Principal ID display from Settings page to simplify user interface",
+      "reqIds": [
+        "AR-50"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-69",
+      "summary": "Add Share App button or invitation system to simplify inviting family members without requiring Principal IDs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-73",
+      "summary": "Create backend methods in main.mo to support invitation-based family connections, including generating invitation tokens, validating invitation tokens, and automatically linking user profiles when an invitation is accepted",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-74",
+      "summary": "Allow parents to change their role from parent to child, but prevent children from changing to parent role",
+      "reqIds": [
+        "AR-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-77",
+      "summary": "Update backend updateUserProfile method in main.mo to accept role changes from parent to child, but validate and reject any role changes from child to parent",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-78",
+      "summary": "Add grocery items sharing feature in chat to send list of grocery items to family members",
+      "reqIds": [
+        "AR-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-79",
+      "summary": "Add social media link sharing feature in chat to send and preview social media links",
+      "reqIds": [
+        "AR-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-80",
+      "summary": "Update the Message data type in backend/main.mo to support a new messageType field with variants for text, groceryList, and socialMediaLink",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-81",
+      "summary": "Extend the Message data structure in backend/main.mo to include an optional groceryItems field that stores an array of grocery item strings when messageType is groceryList",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-82",
+      "summary": "Extend the Message data structure in backend/main.mo to include an optional socialMediaUrl field that stores the URL string when messageType is socialMediaLink",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-83",
+      "summary": "Update the backend sendMessage method in main.mo to accept and validate grocery item arrays and social media URLs based on the messageType parameter",
+      "reqIds": [
+        "REQ-74"
       ],
       "status": "pending"
     }

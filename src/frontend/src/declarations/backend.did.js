@@ -19,12 +19,40 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const ExpenseCategory = IDL.Variant({
+  'other' : IDL.Null,
+  'fees' : IDL.Null,
+  'groceries' : IDL.Null,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
 export const Role = IDL.Variant({ 'child' : IDL.Null, 'parent' : IDL.Null });
+export const FamilyInvitation = IDL.Record({
+  'created' : IDL.Int,
+  'token' : IDL.Text,
+  'expires' : IDL.Int,
+  'parentPrincipal' : IDL.Principal,
+  'childPrincipal' : IDL.Principal,
+  'isValid' : IDL.Bool,
+});
+export const FamilyMember = IDL.Record({
+  'principal' : IDL.Principal,
+  'name' : IDL.Text,
+});
+export const ExpenseEntry = IDL.Record({
+  'timestamp' : IDL.Int,
+  'category' : ExpenseCategory,
+  'amount' : IDL.Nat,
+});
+export const Expenses = IDL.Record({
+  'totalOther' : IDL.Nat,
+  'totalGroceries' : IDL.Nat,
+  'totalFees' : IDL.Nat,
+  'entries' : IDL.Vec(ExpenseEntry),
+});
 export const Location = IDL.Record({
   'latitude' : IDL.Float64,
   'longitude' : IDL.Float64,
@@ -35,8 +63,25 @@ export const UserProfile = IDL.Record({
   'displayName' : IDL.Text,
   'role' : IDL.Opt(Role),
   'lastUpdate' : IDL.Int,
+  'children' : IDL.Vec(FamilyMember),
+  'totalExpenses' : Expenses,
+  'parents' : IDL.Vec(FamilyMember),
   'location' : IDL.Opt(Location),
   'avatar' : IDL.Opt(ExternalBlob),
+});
+export const MessageType = IDL.Variant({
+  'text' : IDL.Null,
+  'socialMediaLink' : IDL.Null,
+  'groceryList' : IDL.Null,
+});
+export const Message = IDL.Record({
+  'socialMediaUrl' : IDL.Opt(IDL.Text),
+  'text' : IDL.Text,
+  'author' : IDL.Principal,
+  'messageType' : MessageType,
+  'groceryItems' : IDL.Opt(IDL.Vec(IDL.Text)),
+  'timestamp' : IDL.Int,
+  'receiver' : IDL.Principal,
 });
 
 export const idlService = IDL.Service({
@@ -67,17 +112,51 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addChild' : IDL.Func([IDL.Text, IDL.Principal], [], []),
+  'addExpense' : IDL.Func([ExpenseCategory, IDL.Nat], [], []),
+  'addParent' : IDL.Func([IDL.Text, IDL.Principal], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'createFamilyInvitationToken' : IDL.Func(
+      [IDL.Principal, IDL.Nat],
+      [IDL.Text],
+      [],
+    ),
   'createProfile' : IDL.Func([IDL.Text, Role], [], []),
+  'getActiveFamilyInvitations' : IDL.Func(
+      [],
+      [IDL.Vec(FamilyInvitation)],
+      ['query'],
+    ),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getExpenseSummary' : IDL.Func([], [Expenses], ['query']),
+  'getMessageHistory' : IDL.Func([], [IDL.Vec(Message)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'removeChild' : IDL.Func([IDL.Principal], [], []),
+  'removeParent' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'sendMessage' : IDL.Func(
+      [
+        IDL.Principal,
+        IDL.Text,
+        MessageType,
+        IDL.Opt(IDL.Vec(IDL.Text)),
+        IDL.Opt(IDL.Text),
+      ],
+      [],
+      [],
+    ),
+  'updateUserProfile' : IDL.Func([UserProfile], [], []),
+  'validateFamilyInvitationToken' : IDL.Func(
+      [IDL.Text, IDL.Principal],
+      [IDL.Principal],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -94,12 +173,40 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const ExpenseCategory = IDL.Variant({
+    'other' : IDL.Null,
+    'fees' : IDL.Null,
+    'groceries' : IDL.Null,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
   const Role = IDL.Variant({ 'child' : IDL.Null, 'parent' : IDL.Null });
+  const FamilyInvitation = IDL.Record({
+    'created' : IDL.Int,
+    'token' : IDL.Text,
+    'expires' : IDL.Int,
+    'parentPrincipal' : IDL.Principal,
+    'childPrincipal' : IDL.Principal,
+    'isValid' : IDL.Bool,
+  });
+  const FamilyMember = IDL.Record({
+    'principal' : IDL.Principal,
+    'name' : IDL.Text,
+  });
+  const ExpenseEntry = IDL.Record({
+    'timestamp' : IDL.Int,
+    'category' : ExpenseCategory,
+    'amount' : IDL.Nat,
+  });
+  const Expenses = IDL.Record({
+    'totalOther' : IDL.Nat,
+    'totalGroceries' : IDL.Nat,
+    'totalFees' : IDL.Nat,
+    'entries' : IDL.Vec(ExpenseEntry),
+  });
   const Location = IDL.Record({
     'latitude' : IDL.Float64,
     'longitude' : IDL.Float64,
@@ -110,8 +217,25 @@ export const idlFactory = ({ IDL }) => {
     'displayName' : IDL.Text,
     'role' : IDL.Opt(Role),
     'lastUpdate' : IDL.Int,
+    'children' : IDL.Vec(FamilyMember),
+    'totalExpenses' : Expenses,
+    'parents' : IDL.Vec(FamilyMember),
     'location' : IDL.Opt(Location),
     'avatar' : IDL.Opt(ExternalBlob),
+  });
+  const MessageType = IDL.Variant({
+    'text' : IDL.Null,
+    'socialMediaLink' : IDL.Null,
+    'groceryList' : IDL.Null,
+  });
+  const Message = IDL.Record({
+    'socialMediaUrl' : IDL.Opt(IDL.Text),
+    'text' : IDL.Text,
+    'author' : IDL.Principal,
+    'messageType' : MessageType,
+    'groceryItems' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'timestamp' : IDL.Int,
+    'receiver' : IDL.Principal,
   });
   
   return IDL.Service({
@@ -142,17 +266,51 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addChild' : IDL.Func([IDL.Text, IDL.Principal], [], []),
+    'addExpense' : IDL.Func([ExpenseCategory, IDL.Nat], [], []),
+    'addParent' : IDL.Func([IDL.Text, IDL.Principal], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'createFamilyInvitationToken' : IDL.Func(
+        [IDL.Principal, IDL.Nat],
+        [IDL.Text],
+        [],
+      ),
     'createProfile' : IDL.Func([IDL.Text, Role], [], []),
+    'getActiveFamilyInvitations' : IDL.Func(
+        [],
+        [IDL.Vec(FamilyInvitation)],
+        ['query'],
+      ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getExpenseSummary' : IDL.Func([], [Expenses], ['query']),
+    'getMessageHistory' : IDL.Func([], [IDL.Vec(Message)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'removeChild' : IDL.Func([IDL.Principal], [], []),
+    'removeParent' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'sendMessage' : IDL.Func(
+        [
+          IDL.Principal,
+          IDL.Text,
+          MessageType,
+          IDL.Opt(IDL.Vec(IDL.Text)),
+          IDL.Opt(IDL.Text),
+        ],
+        [],
+        [],
+      ),
+    'updateUserProfile' : IDL.Func([UserProfile], [], []),
+    'validateFamilyInvitationToken' : IDL.Func(
+        [IDL.Text, IDL.Principal],
+        [IDL.Principal],
+        [],
+      ),
   });
 };
 

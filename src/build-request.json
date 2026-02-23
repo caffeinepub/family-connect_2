@@ -1,104 +1,188 @@
 {
   "kind": "build_request",
-  "title": "Fix role selection modal not displaying on login",
-  "projectName": "FamilyHub",
-  "priority": "high",
+  "title": "Add grocery items and social media link sharing to chat",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-36",
-      "text": "Debug and fix the ProfileSetupModal in App.tsx to ensure it displays immediately when a user logs in without a role set in their profile, and verify the modal properly captures the user's role selection (parent or child)",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-last"
-        ],
-        "quotes": [
-          "no child and parent options are showed up"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Modal appears automatically on login when userProfile.role is undefined or null",
-        "Modal displays both 'Parent' and 'Child' radio button options clearly",
-        "User can select either parent or child role",
-        "Modal does not close until a valid role is selected and saved"
-      ]
-    },
-    {
-      "id": "REQ-37",
-      "text": "Verify the role selection state management in App.tsx correctly detects when userProfile is loaded from the backend and the role field is undefined, then triggers the modal to open",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-last"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Console logs show userProfile data structure when fetched from backend",
-        "Console logs confirm when role is undefined and modal should open",
-        "Modal open state is set to true when conditions are met",
-        "No race conditions prevent modal from appearing"
-      ]
-    },
-    {
-      "id": "REQ-38",
-      "text": "Ensure the updateUserProfile mutation in App.tsx successfully saves the selected role to the backend and refetches the user profile to reflect the updated role",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-last"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Selected role (parent or child) is passed to updateUserProfile mutation",
-        "Backend updateUserProfile method receives and saves the role",
-        "Success callback refetches user profile query",
-        "Updated userProfile includes the newly saved role",
-        "Console logs confirm successful role save operation"
-      ]
-    },
-    {
-      "id": "REQ-39",
-      "text": "Add enhanced debug logging to ProfileSetupModal component lifecycle to trace modal render state, visibility conditions, user profile data, and role selection flow",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-last"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Log when ProfileSetupModal component mounts and unmounts",
-        "Log the current value of isOpen state whenever it changes",
-        "Log userProfile data when it updates, highlighting the role field",
-        "Log when role selection buttons are clicked and what value is selected",
-        "Log when handleRoleSelect is called and the mutation is triggered"
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "text": "Verify the backend getUserProfile method in main.mo correctly returns the complete UserProfile object including the role field for authenticated users",
+      "id": "REQ-71",
+      "text": "Update the Message data type in backend/main.mo to support a new messageType field with variants for text, groceryList, and socialMediaLink",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-last"
+          "msg-latest"
+        ],
+        "quotes": [
+          "in the chat give feature to send grocerie items and send social media links"
         ]
       },
       "acceptanceCriteria": [
-        "getUserProfile returns UserProfile with all fields including role",
-        "When role is not set, it returns as null/undefined",
-        "When role is set, it returns the exact Role variant (Parent or Child)",
-        "No data is lost or corrupted in the response"
+        "Message type includes a variant field that can be 'text', 'groceryList', or 'socialMediaLink'",
+        "Existing text messages continue to work without breaking changes",
+        "The messageType field is properly serialized and deserialized"
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "text": "Extend the Message data structure in backend/main.mo to include an optional groceryItems field that stores an array of grocery item strings when messageType is groceryList",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "send grocerie items"
+        ]
+      },
+      "acceptanceCriteria": [
+        "groceryItems field accepts an array of text strings",
+        "Field is only populated when messageType is 'groceryList'",
+        "Backend stores and retrieves grocery items correctly"
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "text": "Extend the Message data structure in backend/main.mo to include an optional socialMediaUrl field that stores the URL string when messageType is socialMediaLink",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "send social media links"
+        ]
+      },
+      "acceptanceCriteria": [
+        "socialMediaUrl field accepts a text string containing the URL",
+        "Field is only populated when messageType is 'socialMediaLink'",
+        "Backend stores and retrieves social media URLs correctly"
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "text": "Update the backend sendMessage method in main.mo to accept and validate grocery item arrays and social media URLs based on the messageType parameter",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "sendMessage accepts messageType, groceryItems, and socialMediaUrl parameters",
+        "Validation ensures groceryItems is provided when messageType is 'groceryList'",
+        "Validation ensures socialMediaUrl is provided when messageType is 'socialMediaLink'",
+        "Method returns appropriate error messages for invalid input"
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "text": "Update the useSendMessage mutation hook in frontend/src/hooks/useQueries.ts to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Hook accepts optional groceryItems and socialMediaUrl in mutation variables",
+        "Hook properly serializes grocery items array and social media URL for backend",
+        "Mutation invalidates message queries after successful send"
+      ]
+    },
+    {
+      "id": "REQ-76",
+      "text": "Add a grocery list composer UI in the Chat page (frontend/src/pages/Chat.tsx) that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "send grocerie items"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can type grocery item names and add them to a temporary list",
+        "UI shows all items in the current grocery list with remove buttons",
+        "A 'Send Grocery List' button sends all items as a single groceryList message",
+        "The grocery list UI clears after successful send"
+      ]
+    },
+    {
+      "id": "REQ-77",
+      "text": "Add a social media link input field in the Chat page (frontend/src/pages/Chat.tsx) that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "send social media links"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Input field accepts text URLs",
+        "Basic validation checks for valid URL format (http/https)",
+        "A 'Send Link' button sends the URL as a socialMediaLink message",
+        "Input clears after successful send"
+      ]
+    },
+    {
+      "id": "REQ-78",
+      "text": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Grocery list messages display with a distinct visual style (e.g., card or bordered section)",
+        "Each grocery item appears as a list item with checkbox or bullet point",
+        "The message shows the sender and timestamp like regular messages"
+      ]
+    },
+    {
+      "id": "REQ-79",
+      "text": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Social media link messages display with a distinct visual style (e.g., card with link icon)",
+        "URL is rendered as a clickable link with target='_blank' and rel='noopener noreferrer'",
+        "The message shows the sender and timestamp like regular messages",
+        "Link preview card includes visual indication that it's a link (icon, underline, or distinct styling)"
+      ]
+    },
+    {
+      "id": "REQ-80",
+      "text": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI provides clear options to select message type (text, grocery list, social media link)",
+        "Selecting a message type shows the appropriate input interface",
+        "The selected message type is visually indicated",
+        "Users can easily switch between message types"
       ]
     }
   ],
   "constraints": [
-    "Do not modify the backend data model structure for UserProfile or Role",
-    "Preserve existing authentication flow using Internet Identity",
-    "Maintain all existing debug logging that was added in previous versions"
+    "Do not change the existing Message type in a way that breaks existing text message functionality",
+    "Maintain compatibility with the single-actor backend architecture in backend/main.mo"
   ],
   "nonGoals": [
-    "Changing the visual design of the role selection modal",
-    "Adding additional role types beyond parent and child",
-    "Modifying permission request or approval functionality"
+    "Implementing rich link previews with thumbnails or metadata scraping from external URLs",
+    "Adding grocery item autocomplete or suggestions",
+    "Enabling users to check off or mark grocery items as purchased",
+    "Supporting other message types beyond text, grocery lists, and social media links"
   ],
   "imageRequirements": {
     "required": [],

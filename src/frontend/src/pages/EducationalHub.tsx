@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { useGetEducationalData, useUploadQuestionPaper, useUploadAnswerScript, type FileType } from '../hooks/useQueries';
+import { useGetEducationalData, useUploadQuestionPaper, useUploadAnswerScript } from '../hooks/useQueries';
 import { ExternalBlob } from '../backend';
 import { Upload, FileText, Loader2, BookOpen, Brain } from 'lucide-react';
 import AnalysisResults from '../components/AnalysisResults';
@@ -48,9 +48,7 @@ export default function EducationalHub() {
       setUploadProgress(prev => ({ ...prev, answer: percentage }));
     });
 
-    await uploadAnswer.mutateAsync({
-      file: blob,
-    });
+    await uploadAnswer.mutateAsync({ file: blob });
 
     setAnswerFile(null);
     setUploadProgress(prev => ({ ...prev, answer: 0 }));
@@ -112,9 +110,9 @@ export default function EducationalHub() {
                         <span>Uploading...</span>
                         <span>{uploadProgress.question}%</span>
                       </div>
-                      <div className="w-full bg-warm-200 dark:bg-warm-800 rounded-full h-2">
-                        <div 
-                          className="bg-warm-500 h-2 rounded-full transition-all duration-300"
+                      <div className="w-full bg-warm-200 rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all"
                           style={{ width: `${uploadProgress.question}%` }}
                         />
                       </div>
@@ -122,8 +120,8 @@ export default function EducationalHub() {
                   )}
                   <Button
                     type="submit"
-                    className="w-full"
                     disabled={!questionFile || !questionTitle.trim() || uploadQuestion.isPending}
+                    className="w-full"
                   >
                     {uploadQuestion.isPending ? (
                       <>
@@ -166,9 +164,9 @@ export default function EducationalHub() {
                         <span>Uploading...</span>
                         <span>{uploadProgress.answer}%</span>
                       </div>
-                      <div className="w-full bg-warm-200 dark:bg-warm-800 rounded-full h-2">
-                        <div 
-                          className="bg-warm-500 h-2 rounded-full transition-all duration-300"
+                      <div className="w-full bg-warm-200 rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all"
                           style={{ width: `${uploadProgress.answer}%` }}
                         />
                       </div>
@@ -176,8 +174,8 @@ export default function EducationalHub() {
                   )}
                   <Button
                     type="submit"
-                    className="w-full"
                     disabled={!answerFile || uploadAnswer.isPending}
+                    className="w-full"
                   >
                     {uploadAnswer.isPending ? (
                       <>
@@ -197,74 +195,65 @@ export default function EducationalHub() {
           </div>
         </TabsContent>
 
-        <TabsContent value="materials">
-          <Card className="border-warm-200 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-warm-500" />
-                Your Study Materials
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
-                </div>
-              ) : educationalData ? (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-semibold text-warm-900 dark:text-warm-100 mb-3">Question Papers</h3>
-                    {educationalData.questionPapers.length > 0 ? (
-                      <div className="grid gap-3">
-                        {educationalData.questionPapers.map((paper) => (
-                          <div key={paper.id} className="p-4 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <p className="font-medium text-warm-900 dark:text-warm-100">{paper.title}</p>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Uploaded {new Date(Number(paper.uploadTimestamp) / 1000000).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <FileText className="h-5 w-5 text-warm-500" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-center py-8">No question papers uploaded yet</p>
-                    )}
+        <TabsContent value="materials" className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="border-warm-200 shadow-md">
+              <CardHeader>
+                <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-warm-500" />
+                  Question Papers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
                   </div>
+                ) : educationalData?.questionPapers && educationalData.questionPapers.length > 0 ? (
+                  <div className="space-y-2">
+                    {educationalData.questionPapers.map((paper) => (
+                      <div key={paper.id} className="p-3 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
+                        <p className="font-medium text-sm">{paper.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Uploaded: {new Date(Number(paper.uploadTimestamp) / 1000000).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No question papers uploaded yet</p>
+                )}
+              </CardContent>
+            </Card>
 
-                  <div>
-                    <h3 className="font-semibold text-warm-900 dark:text-warm-100 mb-3">Answer Scripts</h3>
-                    {educationalData.answerScripts.length > 0 ? (
-                      <div className="grid gap-3">
-                        {educationalData.answerScripts.map((script) => (
-                          <div key={script.id} className="p-4 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <p className="font-medium text-warm-900 dark:text-warm-100">Answer Script</p>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Uploaded {new Date(Number(script.uploadTimestamp) / 1000000).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <FileText className="h-5 w-5 text-warm-500" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-center py-8">No answer scripts uploaded yet</p>
-                    )}
+            <Card className="border-warm-200 shadow-md">
+              <CardHeader>
+                <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-warm-500" />
+                  Answer Scripts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
                   </div>
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-12">
-                  Upload your study materials to get started
-                </p>
-              )}
-            </CardContent>
-          </Card>
+                ) : educationalData?.answerScripts && educationalData.answerScripts.length > 0 ? (
+                  <div className="space-y-2">
+                    {educationalData.answerScripts.map((script) => (
+                      <div key={script.id} className="p-3 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
+                        <p className="text-xs text-muted-foreground">
+                          Uploaded: {new Date(Number(script.uploadTimestamp) / 1000000).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No answer scripts uploaded yet</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="analysis">

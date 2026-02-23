@@ -1,172 +1,141 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { useShareLocation, useGetAllProfiles } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { Loader2, MapPin, Navigation, Shield } from 'lucide-react';
+import { useShareLocation, useGetFamilyLocations } from '../hooks/useQueries';
+import { useGetCallerUserProfile } from '../hooks/useQueries';
+import { MapPin, Loader2, Navigation } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LocationSharing() {
   const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationError, setLocationError] = useState<string>('');
-  const { identity } = useInternetIdentity();
-  const { data: profiles, isLoading } = useGetAllProfiles();
-  const shareLocation = useShareLocation();
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          setLocationError('Unable to retrieve your location. Please enable location services.');
-        }
-      );
-    } else {
-      setLocationError('Geolocation is not supported by your browser.');
-    }
-  }, []);
+  const shareLocation = useShareLocation();
+  const { data: familyLocations, isLoading: locationsLoading } = useGetFamilyLocations();
+  const { data: userProfile } = useGetCallerUserProfile();
 
   const handleShareLocation = async () => {
-    if (!currentLocation) return;
+    setIsGettingLocation(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
 
-    await shareLocation.mutateAsync({
-      latitude: currentLocation.latitude,
-      longitude: currentLocation.longitude,
-    });
+      const location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+
+      setCurrentLocation(location);
+
+      await shareLocation.mutateAsync({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        timestamp: BigInt(Date.now() * 1000000),
+      });
+
+      toast.success('Location shared successfully!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to get location');
+    } finally {
+      setIsGettingLocation(false);
+    }
   };
 
-  if (!identity) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Card className="border-warm-200 shadow-md">
-          <CardContent className="py-12">
-            <p className="text-center text-muted-foreground">Please log in to access location sharing</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-warm-900 dark:text-warm-100 mb-2">Location Sharing</h1>
-        <p className="text-muted-foreground">Share your location with family members for safety</p>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-warm-900 dark:text-warm-100">Location Sharing</h1>
+        <p className="text-muted-foreground mt-1">Share your location with family members</p>
       </div>
 
-      <div className="grid gap-6">
-        <Card className="border-warm-200 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
-              <Navigation className="h-5 w-5 text-warm-500" />
-              Your Location
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {locationError ? (
-              <div className="text-center py-8">
-                <p className="text-destructive mb-4">{locationError}</p>
-              </div>
-            ) : currentLocation ? (
-              <div className="space-y-4">
-                <div className="p-4 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
-                  <p className="text-sm text-muted-foreground mb-2">Current Coordinates</p>
-                  <p className="font-mono text-sm">
-                    Lat: {currentLocation.latitude.toFixed(6)}, Lng: {currentLocation.longitude.toFixed(6)}
-                  </p>
-                </div>
-                <Button
-                  onClick={handleShareLocation}
-                  className="w-full"
-                  disabled={shareLocation.isPending}
-                >
-                  {shareLocation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sharing...
-                    </>
-                  ) : (
-                    <>
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Share Location with Family
-                    </>
-                  )}
-                </Button>
-              </div>
+      <Card className="border-warm-200 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
+            <Navigation className="h-5 w-5 text-warm-500" />
+            Share Your Location
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button
+            onClick={handleShareLocation}
+            disabled={isGettingLocation || shareLocation.isPending}
+            className="w-full"
+          >
+            {isGettingLocation || shareLocation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sharing Location...
+              </>
             ) : (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
-              </div>
+              <>
+                <MapPin className="mr-2 h-4 w-4" />
+                Share My Location
+              </>
             )}
-          </CardContent>
-        </Card>
+          </Button>
 
-        <Card className="border-warm-200 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-warm-500" />
-              Family Locations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
-              </div>
-            ) : profiles && profiles.length > 0 ? (
-              <div className="space-y-3">
-                {profiles.map((profile, index) => (
-                  <div key={index} className="p-4 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="font-medium text-warm-900 dark:text-warm-100 mb-1">
-                          {profile.displayName}
-                        </p>
-                        {profile.location ? (
-                          <div className="space-y-1">
-                            <p className="text-sm font-mono text-muted-foreground">
-                              Lat: {profile.location.latitude.toFixed(6)}, Lng: {profile.location.longitude.toFixed(6)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Updated: {new Date(Number(profile.location.timestamp) / 1000000).toLocaleString()}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">Location not shared</p>
-                        )}
-                      </div>
-                      <MapPin className="h-5 w-5 text-warm-500" />
+          {currentLocation && (
+            <div className="p-4 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
+              <p className="text-sm font-medium text-warm-900 dark:text-warm-100 mb-2">Your Current Location</p>
+              <p className="text-xs text-muted-foreground">
+                Latitude: {currentLocation.latitude.toFixed(6)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Longitude: {currentLocation.longitude.toFixed(6)}
+              </p>
+            </div>
+          )}
+
+          <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              🔒 Your location is only shared with family members and is not stored permanently.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-warm-200 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-warm-500" />
+            Family Locations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {locationsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
+            </div>
+          ) : familyLocations && familyLocations.length > 0 ? (
+            <div className="space-y-3">
+              {familyLocations.map((loc: any, index: number) => (
+                <div key={index} className="p-4 bg-warm-50 dark:bg-warm-950 rounded-lg border border-warm-200">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-warm-900 dark:text-warm-100">
+                        {userProfile?.parents.find(p => p.principal.toString() === loc.user?.toString())?.name ||
+                         userProfile?.children.find(c => c.principal.toString() === loc.user?.toString())?.name ||
+                         'Family Member'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Lat: {loc.latitude?.toFixed(6)}, Long: {loc.longitude?.toFixed(6)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Updated: {new Date(Number(loc.timestamp) / 1000000).toLocaleString()}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No family members found
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border-warm-200 shadow-md bg-blue-50 dark:bg-blue-950">
-          <CardHeader>
-            <CardTitle className="text-warm-900 dark:text-warm-100 flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              Privacy Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Your location is only shared with family members you've connected with. 
-              Location data is stored securely and you can stop sharing at any time.
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No family locations shared yet
             </p>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

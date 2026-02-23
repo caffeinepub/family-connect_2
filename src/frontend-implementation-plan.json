@@ -1,85 +1,105 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix role selection modal not displaying on login",
+  "title": "Add grocery items and social media link sharing to chat",
   "requirements": [
     {
-      "id": "REQ-36",
-      "summary": "Debug and fix the ProfileSetupModal in App.tsx to ensure it displays immediately when a user logs in without a role set in their profile, and verify the modal properly captures the user's role selection (parent or child)",
+      "id": "REQ-75",
+      "summary": "Update the useSendMessage mutation hook to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
       "acceptanceCriteria": [
-        "Modal appears automatically on login when userProfile.role is undefined or null",
-        "Modal displays both 'Parent' and 'Child' radio button options clearly",
-        "User can select either parent or child role",
-        "Modal does not close until a valid role is selected and saved"
+        "Hook accepts optional groceryItems and socialMediaUrl in mutation variables",
+        "Hook properly serializes grocery items array and social media URL for backend",
+        "Mutation invalidates message queries after successful send"
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Fix the ProfileSetupModal visibility logic to properly detect when userProfile.role is undefined or null. Ensure the modal condition checks for both missing role and completed profile fetch. Update the modal UI to display radio button options for Parent and Child roles clearly. Prevent modal dismissal until a role is selected and saved successfully. Verify the component's usage instructions for the authorization component before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-37",
-      "summary": "Verify the role selection state management in App.tsx correctly detects when userProfile is loaded from the backend and the role field is undefined, then triggers the modal to open",
-      "acceptanceCriteria": [
-        "Console logs show userProfile data structure when fetched from backend",
-        "Console logs confirm when role is undefined and modal should open",
-        "Modal open state is set to true when conditions are met",
-        "No race conditions prevent modal from appearing"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add comprehensive console logging to trace userProfile data when fetched from backend. Log the complete userProfile object structure including the role field value. Add conditional logging that confirms when role is undefined/null and the modal should open. Log the modal open state changes to verify proper state management. Ensure logging captures the timing of profile fetch completion to detect race conditions."
-        },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add debug logging to the useGetCallerUserProfile hook to trace when the query is enabled, when it starts fetching, and when it completes. Log the returned userProfile data structure with emphasis on the role field. Ensure the hook properly exposes isFetched state to prevent premature modal display checks."
+          "description": "Extend the useSendMessage mutation hook to accept messageType, groceryItems (array of strings), and socialMediaUrl (string) as optional parameters in the mutation variables. Update the mutation function to call actor.sendMessage with these new parameters, passing null for groceryItems/socialMediaUrl when not provided. Ensure the mutation continues to invalidate ['messages'] query key after successful send."
         }
       ]
     },
     {
-      "id": "REQ-38",
-      "summary": "Ensure the updateUserProfile mutation in App.tsx successfully saves the selected role to the backend and refetches the user profile to reflect the updated role",
+      "id": "REQ-76",
+      "summary": "Add a grocery list composer UI in the Chat page that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
       "acceptanceCriteria": [
-        "Selected role (parent or child) is passed to updateUserProfile mutation",
-        "Backend updateUserProfile method receives and saves the role",
-        "Success callback refetches user profile query",
-        "Updated userProfile includes the newly saved role",
-        "Console logs confirm successful role save operation"
+        "Users can type grocery item names and add them to a temporary list",
+        "UI shows all items in the current grocery list with remove buttons",
+        "A 'Send Grocery List' button sends all items as a single groceryList message",
+        "The grocery list UI clears after successful send"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/Chat.tsx",
           "operation": "modify",
-          "description": "Verify the ProfileSetupModal handleRoleSelect function correctly constructs the updated userProfile object with the selected role (Parent or Child enum value). Ensure the mutation calls saveCallerUserProfile with the complete profile including the new role. Add success callback that invalidates and refetches the currentUserProfile query. Add console logging to confirm the role value being saved and the success response. Verify that the modal closes only after successful profile update."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add debug logging to the useSaveCallerUserProfile mutation hook to trace when the mutation is called, what profile data is being sent (including role field), and when it completes successfully or fails. Log the mutation response and any errors. Ensure the mutation properly triggers query invalidation for currentUserProfile after success."
+          "description": "Add a grocery list composer section to the Chat page. Include local state to manage a temporary array of grocery items (strings). Add an input field for typing grocery item names with an 'Add Item' button that appends the item to the temporary list. Display all items in the list with individual remove buttons. Add a 'Send Grocery List' button that calls the useSendMessage mutation with messageType 'groceryList' and the groceryItems array, then clears the temporary list on success. Position this UI in the message composition area, visible when the grocery list message type is selected."
         }
       ]
     },
     {
-      "id": "REQ-39",
-      "summary": "Add enhanced debug logging to ProfileSetupModal component lifecycle to trace modal render state, visibility conditions, user profile data, and role selection flow",
+      "id": "REQ-77",
+      "summary": "Add a social media link input field in the Chat page that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
       "acceptanceCriteria": [
-        "Log when ProfileSetupModal component mounts and unmounts",
-        "Log the current value of isOpen state whenever it changes",
-        "Log userProfile data when it updates, highlighting the role field",
-        "Log when role selection buttons are clicked and what value is selected",
-        "Log when handleRoleSelect is called and the mutation is triggered"
+        "Input field accepts text URLs",
+        "Basic validation checks for valid URL format (http/https)",
+        "A 'Send Link' button sends the URL as a socialMediaLink message",
+        "Input clears after successful send"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/Chat.tsx",
           "operation": "modify",
-          "description": "Add useEffect hook to ProfileSetupModal (or the section of App.tsx where the modal is defined) to log component mount and unmount lifecycle events. Add logging for isOpen state changes using useEffect with isOpen as dependency. Add logging when userProfile prop updates, with detailed output of the role field value. Add console logs inside role selection button onClick handlers to trace which role is clicked. Add logging at the start of handleRoleSelect function to confirm when mutation is triggered and with what data."
+          "description": "Add a social media link input section to the Chat page. Include an input field for entering URLs with local state management. Implement basic client-side validation to check that the URL starts with 'http://' or 'https://'. Add a 'Send Link' button that calls the useSendMessage mutation with messageType 'socialMediaLink' and the socialMediaUrl parameter when validation passes. Clear the input field after successful send. Display validation error messages when the URL format is invalid. Position this UI in the message composition area, visible when the social media link message type is selected."
+        }
+      ]
+    },
+    {
+      "id": "REQ-78",
+      "summary": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
+      "acceptanceCriteria": [
+        "Grocery list messages display with a distinct visual style (e.g., card or bordered section)",
+        "Each grocery item appears as a list item with checkbox or bullet point",
+        "The message shows the sender and timestamp like regular messages"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Chat.tsx",
+          "operation": "modify",
+          "description": "Update the message rendering logic in Chat.tsx to conditionally render grocery list messages. When message.messageType is 'groceryList', display the message with a distinct card or bordered visual style. Map over message.groceryItems array and render each item as a list entry with a checkbox or bullet point. Include the sender name (fetched from user profile) and timestamp in the message header, consistent with regular text messages. Use Tailwind CSS classes to style the grocery list message differently from text messages (e.g., bg-green-50 border-green-200 for light mode)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-79",
+      "summary": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
+      "acceptanceCriteria": [
+        "Social media link messages display with a distinct visual style (e.g., card with link icon)",
+        "URL is rendered as a clickable link with target='_blank' and rel='noopener noreferrer'",
+        "The message shows the sender and timestamp like regular messages",
+        "Link preview card includes visual indication that it's a link (icon, underline, or distinct styling)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Chat.tsx",
+          "operation": "modify",
+          "description": "Update the message rendering logic in Chat.tsx to conditionally render social media link messages. When message.messageType is 'socialMediaLink', display the message as a card with distinct styling (e.g., bg-blue-50 border-blue-200). Render message.socialMediaUrl as a clickable hyperlink with target='_blank' and rel='noopener noreferrer' for security. Include a link icon (from lucide-react or similar) next to the URL. Include the sender name and timestamp in the message header, consistent with regular messages. Apply visual indicators that it's a clickable link (underline, icon, hover effects)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-80",
+      "summary": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
+      "acceptanceCriteria": [
+        "UI provides clear options to select message type (text, grocery list, social media link)",
+        "Selecting a message type shows the appropriate input interface",
+        "The selected message type is visually indicated",
+        "Users can easily switch between message types"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Chat.tsx",
+          "operation": "modify",
+          "description": "Add a message type selector UI component to the Chat page above the message composition area. Implement three toggle buttons or radio buttons labeled 'Text Message', 'Grocery List', and 'Social Media Link'. Use local state to track the currently selected message type. Apply distinct styling to visually indicate the active selection (e.g., bg-primary text-white for selected, bg-gray-100 for unselected). When a message type is selected, conditionally render the appropriate input interface: the existing text input for 'Text Message', the grocery list composer for 'Grocery List', and the URL input for 'Social Media Link'. Ensure smooth transitions between message type selections."
         }
       ]
     }

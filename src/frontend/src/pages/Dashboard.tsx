@@ -12,6 +12,9 @@ import PermissionRequestWidget from '../components/PermissionRequestWidget';
 import PermissionApprovalInterface from '../components/PermissionApprovalInterface';
 import FightsSolvedWidget from '../components/FightsSolvedWidget';
 import FightsCreatedWidget from '../components/FightsCreatedWidget';
+import ExpenseChart from '../components/ExpenseChart';
+import ExpenseInput from '../components/ExpenseInput';
+import ExpenseAnalysis from '../components/ExpenseAnalysis';
 import { Role } from '../backend';
 
 export default function Dashboard() {
@@ -90,7 +93,7 @@ export default function Dashboard() {
       <div className="relative rounded-2xl overflow-hidden shadow-lg">
         <img
           src="/assets/generated/dashboard-interface.dim_1200x800.png"
-          alt="FamilyHub Dashboard"
+          alt="FamilyConnect Dashboard"
           className="w-full h-auto"
         />
       </div>
@@ -117,6 +120,19 @@ export default function Dashboard() {
           <PermissionRequestWidget />
         </div>
       )}
+
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-warm-900 dark:text-warm-100">
+          Weekly Expense Tracking
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ExpenseChart />
+          {isParent && <ExpenseInput />}
+        </div>
+
+        <ExpenseAnalysis />
+      </div>
 
       <Card className="border-warm-200 shadow-md">
         <CardHeader>

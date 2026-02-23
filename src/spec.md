@@ -1,13 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the ProfileSetupModal so it displays immediately when a user logs in without a role, and ensure the role selection (parent or child) is properly saved.
+**Goal:** Enable users to send grocery lists and social media links in the family chat, in addition to regular text messages.
 
 **Planned changes:**
-- Debug and fix ProfileSetupModal in App.tsx to display automatically when userProfile.role is undefined
-- Add enhanced debug logging to trace modal render state, visibility conditions, and role selection flow
-- Verify role selection state management correctly detects when userProfile is loaded and role is undefined
-- Ensure updateUserProfile mutation successfully saves the selected role and refetches the user profile
-- Verify backend getUserProfile method returns complete UserProfile with role field
+- Extend the Message data type to support three message types: text, groceryList, and socialMediaLink
+- Add optional fields for grocery items array and social media URL to the Message structure
+- Update backend sendMessage method to accept and validate grocery items and social media URLs
+- Add UI components for composing grocery lists with add/remove item functionality
+- Add input field for social media links with basic URL validation
+- Display grocery lists as formatted lists with checkboxes or bullet points
+- Display social media links as clickable link preview cards
+- Add message type selector to switch between text, grocery list, and link modes
 
-**User-visible outcome:** Users logging in without a role will immediately see the parent/child selection modal, be able to select their role, and have it properly saved to their profile.
+**User-visible outcome:** Family members can send grocery shopping lists with multiple items and share social media links in the chat, with each message type displaying with its own distinct visual style.

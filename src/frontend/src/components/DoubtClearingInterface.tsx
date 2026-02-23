@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { useAskDoubt, useMarkProblemResolved, useGetEducationalData } from '../hooks/useQueries';
+import { useAskDoubt, useGetEducationalData } from '../hooks/useQueries';
 import { Loader2, Send, CheckCircle, MessageCircle } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { toast } from 'sonner';
 
 export default function DoubtClearingInterface() {
   const [question, setQuestion] = useState('');
   const [responses, setResponses] = useState<Array<{ question: string; answer: string; timestamp: Date }>>([]);
   
   const askDoubt = useAskDoubt();
-  const markResolved = useMarkProblemResolved();
   const { data: educationalData } = useGetEducationalData();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +31,8 @@ export default function DoubtClearingInterface() {
   };
 
   const handleMarkResolved = async () => {
-    await markResolved.mutateAsync();
+    toast.success('Problem marked as resolved!');
+    setResponses([]);
   };
 
   const formatTime = (date: Date): string => {
@@ -78,16 +79,9 @@ export default function DoubtClearingInterface() {
                   type="button"
                   variant="outline"
                   onClick={handleMarkResolved}
-                  disabled={markResolved.isPending}
                 >
-                  {markResolved.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Mark Resolved
-                    </>
-                  )}
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Mark Resolved
                 </Button>
               )}
             </div>
