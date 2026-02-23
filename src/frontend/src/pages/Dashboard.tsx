@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
 import { useGetCallerUserProfile } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Loader2, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Role } from '../backend';
+import LoadingSpinner from '../components/LoadingSpinner';
 import HappinessMeter from '../components/HappinessMeter';
 import ProblemsSolvedWidget from '../components/ProblemsSolvedWidget';
 import PermissionRequestWidget from '../components/PermissionRequestWidget';
@@ -35,11 +37,7 @@ export default function Dashboard() {
   }
 
   if (profileLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-12 w-12 animate-spin text-warm-500" />
-      </div>
-    );
+    return <LoadingSpinner size="lg" className="min-h-[60vh]" />;
   }
 
   if (!userProfile) {
@@ -69,38 +67,56 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <FamilyMemberGrid />
+      <Suspense fallback={<LoadingSpinner />}>
+        <FamilyMemberGrid />
+      </Suspense>
 
       {isParent && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <HappinessMeter />
-          <ProblemsSolvedWidget />
-          <FightsSolvedWidget />
-          <FightsCreatedWidget />
+          <Suspense fallback={<LoadingSpinner />}>
+            <HappinessMeter />
+            <ProblemsSolvedWidget />
+            <FightsSolvedWidget />
+            <FightsCreatedWidget />
+          </Suspense>
           <div className="md:col-span-2 lg:col-span-3">
-            <PermissionApprovalInterface />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PermissionApprovalInterface />
+            </Suspense>
           </div>
           <div className="md:col-span-2 lg:col-span-3">
-            <AIConflictAnalysis />
+            <Suspense fallback={<LoadingSpinner />}>
+              <AIConflictAnalysis />
+            </Suspense>
           </div>
           <div className="md:col-span-2 lg:col-span-3">
-            <ExpenseChart />
+            <Suspense fallback={<LoadingSpinner />}>
+              <ExpenseChart />
+            </Suspense>
           </div>
           <div className="md:col-span-2 lg:col-span-3">
-            <ExpenseInput />
+            <Suspense fallback={<LoadingSpinner />}>
+              <ExpenseInput />
+            </Suspense>
           </div>
           <div className="md:col-span-2 lg:col-span-3">
-            <ExpenseAnalysis />
+            <Suspense fallback={<LoadingSpinner />}>
+              <ExpenseAnalysis />
+            </Suspense>
           </div>
         </div>
       )}
 
       {isChild && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <HappinessMeter />
-          <ProblemsSolvedWidget />
+          <Suspense fallback={<LoadingSpinner />}>
+            <HappinessMeter />
+            <ProblemsSolvedWidget />
+          </Suspense>
           <div className="md:col-span-2">
-            <PermissionRequestWidget />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PermissionRequestWidget />
+            </Suspense>
           </div>
         </div>
       )}

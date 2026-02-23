@@ -1,96 +1,163 @@
 {
   "kind": "build_request",
-  "title": "Add AI chat analysis with parliamentary language remedies and problems solved widget",
+  "title": "Convert web application to Progressive Web App (PWA)",
   "projectName": "FamilyConnect",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a widget to the dashboard that displays the total number of problems solved, showing a count that can be updated when AI remedies are applied or problems are marked as resolved",
-      "target": "both",
+      "text": "Enhance PWA manifest to enable full app installation experience with complete metadata including name, short_name, description, start_url, display mode set to 'standalone', orientation preferences, and comprehensive icon set covering all required sizes (192x192, 512x512, maskable variants)",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-last"
         ],
         "quotes": [
-          "it should havwe widget for  number probelem solved"
+          "website to app convert"
         ]
       },
       "acceptanceCriteria": [
-        "Widget displays a numeric count of total problems solved",
-        "Count updates when problems are resolved through AI remedies or manual resolution",
-        "Widget is visible on the dashboard page"
+        "PWA manifest includes all required fields for app installation",
+        "App can be installed on mobile devices and desktop browsers",
+        "App displays in standalone mode without browser UI when launched",
+        "App icons appear correctly on home screen and app drawer"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement AI-powered chat analysis that detects problems in conversations and automatically generates remedy suggestions to help resolve the identified issues",
-      "target": "both",
+      "text": "Upgrade service worker implementation to support full offline functionality with advanced caching strategies, background sync for data mutations when offline, and cache versioning for proper update management",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-last"
         ],
         "quotes": [
-          "the aiit should give remedies to the probelems"
+          "website to app convert"
         ]
       },
       "acceptanceCriteria": [
-        "AI analyzes chat messages to identify problems or conflicts",
-        "System generates specific remedy suggestions for detected problems",
-        "Remedies are displayed to users in the chat interface"
+        "App loads and displays cached content when offline",
+        "User actions made offline are queued and sync when connection restored",
+        "Service worker updates cleanly without leaving stale caches",
+        "Users see appropriate offline status indicators"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Ensure all AI-generated remedy suggestions use only parliamentary language, maintaining formal, respectful, and dignified wording in all communications",
-      "target": "backend",
+      "text": "Add iOS-specific meta tags and configurations for optimal installation experience on iOS devices including apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style, and apple-touch-startup-image for splash screens",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-last"
         ],
         "quotes": [
-          "the ai should only use parlimentary words"
+          "website to app convert"
         ]
       },
       "acceptanceCriteria": [
-        "All AI remedy text uses formal parliamentary language conventions",
-        "Language is respectful, dignified, and avoids casual or colloquial expressions",
-        "Remedies maintain a professional tone appropriate for parliamentary discourse"
+        "App can be added to iOS home screen with proper icon",
+        "App launches in fullscreen mode on iOS without Safari UI",
+        "Status bar styling matches app theme on iOS",
+        "Splash screen displays during app launch on iOS"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Add a toggle control that allows users to enable or disable the AI remedy feature, preserving their preference across sessions",
-      "target": "both",
+      "text": "Implement app-like navigation patterns with native-feeling transitions, gesture support for back navigation, and proper handling of hardware back button on Android devices",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-previous"
+          "msg-last"
         ],
         "quotes": [
-          "if user don't like the remedies they can turn it off"
+          "website to app convert"
         ]
       },
       "acceptanceCriteria": [
-        "Toggle control is accessible in the chat interface or settings",
-        "When disabled, AI remedies are not generated or displayed",
-        "User preference persists across sessions",
-        "Toggle state is stored in user profile or local storage"
+        "Navigation feels smooth with app-like transitions",
+        "Swipe gestures work for appropriate navigation actions",
+        "Android hardware back button functions correctly",
+        "Navigation history is preserved across app restarts"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add install prompt functionality that detects when the app is installable and presents a custom in-app installation banner with clear call-to-action for users to add the app to their device",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "website to app convert"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Install banner appears when app meets PWA criteria",
+        "Users can dismiss or trigger installation from banner",
+        "Banner respects user preferences and doesn't reappear if dismissed",
+        "Installation success is tracked and banner hidden after install"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Optimize app performance for mobile devices including lazy loading routes, image optimization, reducing bundle size, and implementing proper loading states for slow connections",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "website to app convert"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Initial load time is under 3 seconds on 3G connection",
+        "Routes load on-demand rather than upfront",
+        "Images are properly compressed and use responsive formats",
+        "Loading indicators appear for operations taking >300ms"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Implement responsive design improvements to ensure the app feels native on all screen sizes from small phones to tablets, with touch-optimized tap targets (minimum 44x44px) and appropriate spacing",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "website to app convert"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All interactive elements meet minimum touch target size",
+        "Layout adapts smoothly across device sizes",
+        "No horizontal scrolling on any device",
+        "Text remains readable without zooming on all devices"
       ]
     }
   ],
   "constraints": [
-    "AI remedy language must strictly adhere to parliamentary conventions",
-    "Existing AIConflictAnalysis component should be integrated or extended for chat analysis",
-    "Problems solved count must persist in backend storage"
+    "Must maintain existing functionality and user data",
+    "Must work with current Internet Identity authentication",
+    "Must support both light and dark mode themes",
+    "Must preserve existing backend actor implementation"
   ],
   "nonGoals": [
-    "Integration with external AI services or APIs",
-    "Real-time WebSocket-based chat updates",
-    "Voice or video chat capabilities",
-    "Multi-language support for parliamentary terms"
+    "Native iOS or Android app development",
+    "Push notification infrastructure",
+    "Native mobile framework integration",
+    "Complete UI redesign or rebranding"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "App icon in 192x192 resolution with transparent background suitable for all platforms (app-icon-192.dim_192x192.png)",
+      "App icon in 512x512 resolution with transparent background for high-res displays (app-icon-512.dim_512x512.png)",
+      "Maskable app icon in 512x512 resolution with safe zone padding for Android adaptive icons (app-icon-maskable.dim_512x512.png)",
+      "iOS splash screen for iPhone portrait orientation showing app branding (splash-iphone.dim_750x1334.png)",
+      "iOS splash screen for iPad portrait orientation showing app branding (splash-ipad.dim_1536x2048.png)"
+    ],
     "edits": []
   }
 }

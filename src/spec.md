@@ -1,13 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Add AI-powered chat analysis with parliamentary language remedies and a problems solved tracking widget to the dashboard.
+**Goal:** Convert the FamilyConnect web application into a Progressive Web App (PWA) that can be installed and used like a native mobile app.
 
 **Planned changes:**
-- Add a "Problems Solved" widget to the dashboard displaying a numeric count of resolved issues
-- Implement AI chat analysis to detect problems in conversations and generate remedy suggestions
-- Ensure all AI remedies use formal parliamentary language conventions
-- Add a toggle control to enable/disable AI remedies with persistent user preference
-- Update problem count when remedies are applied or issues are manually resolved
+- Enhance PWA manifest with complete metadata and icon set for app installation
+- Upgrade service worker to support offline functionality with caching and background sync
+- Add iOS-specific meta tags for optimal installation experience on Apple devices
+- Implement app-like navigation with native transitions and gesture support
+- Add custom install prompt to encourage users to add app to their device
+- Optimize performance for mobile devices with lazy loading and image optimization
+- Improve responsive design with touch-optimized tap targets and spacing
 
-**User-visible outcome:** Users can see AI-generated parliamentary language remedies for detected problems in chats, track total problems solved via a dashboard widget, and toggle the AI remedy feature on/off based on their preference.
+**User-visible outcome:** Users can install FamilyConnect as an app on their mobile device or desktop, use it offline, and experience native app-like navigation and performance.

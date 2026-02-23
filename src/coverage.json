@@ -1,86 +1,150 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-23T16:27:17.635Z",
+  "generatedAt": "2026-02-23T16:40:11.863Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 3,
+    "total": 7,
+    "implemented": 7,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a widget to the dashboard that displays the total number of problems solved, showing a count that can be updated when AI remedies are applied or problems are marked as resolved",
+        "summary": "Enhance PWA manifest to enable full app installation experience with complete metadata including name, short_name, description, start_url, display mode set to 'standalone', orientation preferences, and comprehensive icon set covering all required sizes (192x192, 512x512, maskable variants)",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ProblemsSolvedWidget.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/Dashboard.tsx"
+          "frontend/public/manifest.json",
+          "frontend/index.html"
         ],
         "matchedFiles": [
-          "frontend/src/components/ProblemsSolvedWidget.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/public/manifest.json",
+          "frontend/index.html"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement AI-powered chat analysis that detects problems in conversations and automatically generates remedy suggestions to help resolve the identified issues",
+        "summary": "Upgrade service worker implementation to support full offline functionality with advanced caching strategies, background sync for data mutations when offline, and cache versioning for proper update management",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AIConflictAnalysis.tsx",
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/public/sw.js",
+          "frontend/src/main.tsx",
+          "frontend/src/hooks/useOnlineStatus.ts",
+          "frontend/src/components/OfflineIndicator.tsx",
+          "frontend/src/components/Layout.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/AIConflictAnalysis.tsx",
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/public/sw.js",
+          "frontend/src/hooks/useOnlineStatus.ts",
+          "frontend/src/components/OfflineIndicator.tsx",
+          "frontend/src/components/Layout.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Ensure all AI-generated remedy suggestions use only parliamentary language, maintaining formal, respectful, and dignified wording in all communications",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Add iOS-specific meta tags and configurations for optimal installation experience on iOS devices including apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style, and apple-touch-startup-image for splash screens",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/index.html"
+        ]
       },
       {
         "id": "REQ-4",
-        "summary": "Add a toggle control that allows users to enable or disable the AI remedy feature, preserving their preference across sessions",
+        "summary": "Implement app-like navigation patterns with native-feeling transitions, gesture support for back navigation, and proper handling of hardware back button on Android devices",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/Settings.tsx",
-          "frontend/src/components/AIConflictAnalysis.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useSwipeNavigation.ts",
+          "frontend/src/components/Layout.tsx",
+          "frontend/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Chat.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/Settings.tsx",
-          "frontend/src/components/AIConflictAnalysis.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useSwipeNavigation.ts",
+          "frontend/src/components/Layout.tsx",
+          "frontend/index.css"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add install prompt functionality that detects when the app is installable and presents a custom in-app installation banner with clear call-to-action for users to add the app to their device",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useInstallPrompt.ts",
+          "frontend/src/components/InstallPromptBanner.tsx",
+          "frontend/src/components/Layout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useInstallPrompt.ts",
+          "frontend/src/components/InstallPromptBanner.tsx",
+          "frontend/src/components/Layout.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Optimize app performance for mobile devices including lazy loading routes, image optimization, reducing bundle size, and implementing proper loading states for slow connections",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/LoadingSpinner.tsx",
+          "frontend/src/components/MediaGallery.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/LoadingSpinner.tsx",
+          "frontend/src/pages/Dashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Implement responsive design improvements to ensure the app feels native on all screen sizes from small phones to tablets, with touch-optimized tap targets (minimum 44x44px) and appropriate spacing",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/components/ChatWidget.tsx",
+          "frontend/src/pages/Dashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Dashboard.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/AIConflictAnalysis.tsx",
-    "frontend/src/components/ProblemsSolvedWidget.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/Chat.tsx",
-    "frontend/src/pages/Settings.tsx",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/public/assets/generated/app-icon-192.dim_192x192.png",
+    "frontend/public/assets/generated/app-icon-512.dim_512x512.png",
+    "frontend/public/assets/generated/app-icon-maskable.dim_512x512.png",
+    "frontend/public/assets/generated/splash-ipad.dim_1536x2048.png",
+    "frontend/public/assets/generated/splash-iphone.dim_750x1334.png",
+    "frontend/public/manifest.json",
+    "frontend/public/sw.js",
+    "frontend/src/App.tsx",
+    "frontend/src/components/InstallPromptBanner.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/LoadingSpinner.tsx",
+    "frontend/src/components/OfflineIndicator.tsx",
+    "frontend/src/hooks/useInstallPrompt.ts",
+    "frontend/src/hooks/useOnlineStatus.ts",
+    "frontend/src/hooks/useSwipeNavigation.ts",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

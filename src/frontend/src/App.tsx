@@ -1,16 +1,20 @@
+import { lazy, Suspense } from 'react';
 import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet, useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from './hooks/useQueries';
 import { useEffect } from 'react';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import MediaGallery from './pages/MediaGallery';
-import Reminders from './pages/Reminders';
-import LocationSharing from './pages/LocationSharing';
-import Chat from './pages/Chat';
-import EducationalHub from './pages/EducationalHub';
-import Settings from './pages/Settings';
-import Onboarding from './pages/Onboarding';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy load pages for code splitting
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const MediaGallery = lazy(() => import('./pages/MediaGallery'));
+const Reminders = lazy(() => import('./pages/Reminders'));
+const LocationSharing = lazy(() => import('./pages/LocationSharing'));
+const Chat = lazy(() => import('./pages/Chat'));
+const EducationalHub = lazy(() => import('./pages/EducationalHub'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
 
 function AppContent() {
   const { identity } = useInternetIdentity();
@@ -28,7 +32,9 @@ function AppContent() {
 
   return (
     <Layout>
-      <Outlet />
+      <Suspense fallback={<LoadingSpinner size="lg" className="min-h-[60vh]" />}>
+        <Outlet />
+      </Suspense>
     </Layout>
   );
 }

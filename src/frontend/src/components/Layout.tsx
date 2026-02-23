@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
@@ -6,6 +6,9 @@ import { Button } from './ui/button';
 import { Home, Image, Bell, MapPin, MessageCircle, Heart, GraduationCap, Settings } from 'lucide-react';
 import ShareApp from './ShareApp';
 import ChatWidget from './ChatWidget';
+import OfflineIndicator from './OfflineIndicator';
+import InstallPromptBanner from './InstallPromptBanner';
+import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,9 +20,25 @@ export default function Layout({ children }: LayoutProps) {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
 
+  // Enable swipe navigation
+  useSwipeNavigation({ enabled: true, threshold: 100 });
+
   const isAuthenticated = !!identity;
   const disabled = loginStatus === 'logging-in';
   const buttonText = loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login';
+
+  // Handle Android back button
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      console.log('[Navigation] Back button pressed');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -49,11 +68,14 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-warm-50 via-white to-warm-100 dark:from-warm-950 dark:via-warm-900 dark:to-warm-950">
+    <div className="min-h-screen bg-gradient-to-br from-warm-50 via-white to-warm-100 dark:from-warm-950 dark:via-warm-900 dark:to-warm-950 touch-pan-y">
+      <OfflineIndicator />
+      <InstallPromptBanner />
+
       <header className="bg-white dark:bg-warm-900 border-b border-warm-200 dark:border-warm-800 shadow-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity min-h-[44px]">
               <div className="bg-gradient-to-br from-warm-500 to-warm-600 p-2 rounded-xl shadow-md">
                 <Heart className="h-6 w-6 text-white" fill="white" />
               </div>
@@ -68,7 +90,7 @@ export default function Layout({ children }: LayoutProps) {
                 onClick={handleAuth}
                 disabled={disabled}
                 variant={isAuthenticated ? 'outline' : 'default'}
-                className={isAuthenticated ? 'border-warm-300' : 'bg-warm-500 hover:bg-warm-600'}
+                className={`min-h-[44px] min-w-[44px] ${isAuthenticated ? 'border-warm-300' : 'bg-warm-500 hover:bg-warm-600'}`}
               >
                 {buttonText}
               </Button>
@@ -88,7 +110,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Button
                     variant={isActive ? 'default' : 'ghost'}
                     size="sm"
-                    className={`flex items-center gap-2 whitespace-nowrap ${
+                    className={`flex items-center gap-2 whitespace-nowrap min-h-[44px] min-w-[44px] ${
                       isActive ? 'bg-warm-500 hover:bg-warm-600 text-white' : 'text-warm-700 dark:text-warm-300'
                     }`}
                   >
@@ -102,7 +124,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-8">{children}</main>
+      <main className="container mx-auto px-4 py-8 page-transition">{children}</main>
 
       <footer className="bg-white dark:bg-warm-900 border-t border-warm-200 dark:border-warm-800 mt-16">
         <div className="container mx-auto px-4 py-6">

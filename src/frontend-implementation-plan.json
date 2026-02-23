@@ -1,89 +1,214 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add AI chat analysis with parliamentary language remedies and problems solved widget",
+  "title": "Convert FamilyConnect to Progressive Web App",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add widget to dashboard displaying total number of problems solved",
+      "summary": "Enhance PWA manifest with complete metadata and comprehensive icon set for full app installation experience",
       "acceptanceCriteria": [
-        "Widget displays a numeric count of total problems solved",
-        "Count updates when problems are resolved through AI remedies or manual resolution",
-        "Widget is visible on the dashboard page"
+        "PWA manifest includes all required fields for app installation",
+        "App can be installed on mobile devices and desktop browsers",
+        "App displays in standalone mode without browser UI when launched",
+        "App icons appear correctly on home screen and app drawer"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProblemsSolvedWidget.tsx",
+          "path": "frontend/public/manifest.json",
           "operation": "modify",
-          "description": "Update the existing ProblemsSolvedWidget component to display a count of total problems solved (combining educational doubts resolved and family conflicts resolved). Wire it to use both getFightsSolved and any educational problem resolution count from the backend. Ensure the count updates dynamically when problems are marked as resolved."
+          "description": "Enhance manifest with complete metadata including short_name, description, start_url, display: 'standalone', orientation preferences, background_color, theme_color, categories, and comprehensive icon set referencing frontend/public/assets/generated/app-icon-192.dim_192x192.png, app-icon-512.dim_512x512.png, and app-icon-maskable.dim_512x512.png with appropriate purpose attributes"
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Add a query hook useGetTotalProblemsSolved that fetches the combined count of fights solved (via getFightsSolved) and educational problems resolved. This hook should aggregate both data sources to provide a single total count for the widget."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Ensure the ProblemsSolvedWidget is properly displayed on the dashboard for both parent and child role views. Verify it's positioned appropriately in the widget grid alongside other dashboard components."
+          "description": "Add manifest link if missing and ensure theme-color meta tag matches manifest theme_color for consistent branding across platforms"
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Implement AI-powered chat analysis that detects problems and generates remedy suggestions",
+      "summary": "Upgrade service worker with advanced caching strategies, background sync, and cache versioning for full offline functionality",
       "acceptanceCriteria": [
-        "AI analyzes chat messages to identify problems or conflicts",
-        "System generates specific remedy suggestions for detected problems",
-        "Remedies are displayed to users in the chat interface"
+        "App loads and displays cached content when offline",
+        "User actions made offline are queued and sync when connection restored",
+        "Service worker updates cleanly without leaving stale caches",
+        "Users see appropriate offline status indicators"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AIConflictAnalysis.tsx",
+          "path": "frontend/public/sw.js",
           "operation": "modify",
-          "description": "Extend the existing AIConflictAnalysis component to integrate with the chat message history. Instead of mock data, fetch actual messages using the message history query and analyze them for conflicts. Display detected problems with AI-generated remedy suggestions in parliamentary language. Add functionality to mark remedies as applied, which should update the problems solved count. Verify the component's usage instructions from the authorization component before implementing."
+          "description": "Upgrade service worker to implement versioned caching with CACHE_NAME constant, precache critical assets during install event, implement cache-first strategy for static assets with fallback, network-first for API calls, and add background sync registration for POST requests when offline with proper sync event handling and cache cleanup on activation"
         },
         {
-          "path": "frontend/src/pages/Chat.tsx",
+          "path": "frontend/src/main.tsx",
           "operation": "modify",
-          "description": "Integrate the enhanced AIConflictAnalysis component into the chat page UI. Position it alongside the chat message display so users can see detected problems and remedies while conversing. Ensure the component appears only when AI remedy is enabled (controlled by the toggle in REQ-4)."
+          "description": "Add service worker registration logic with update detection, prompt user for reload when new version available, and implement proper error handling for registration failures"
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/hooks/useOnlineStatus.ts",
+          "operation": "create",
+          "description": "Create custom React hook that monitors navigator.onLine and online/offline events to provide real-time online status, returning isOnline boolean and triggering re-renders on connectivity changes"
+        },
+        {
+          "path": "frontend/src/components/OfflineIndicator.tsx",
+          "operation": "create",
+          "description": "Create component that uses useOnlineStatus hook to display a dismissible banner or toast when offline, informing users that changes will sync when connection is restored"
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Add mutation hooks for marking AI remedies as applied (useApplyRemedy) and for incrementing the problems solved counter when a remedy successfully resolves a conflict. Wire these mutations to trigger query invalidation for the total problems solved count."
+          "description": "Import and render OfflineIndicator component in the layout to display offline status across all pages"
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add iOS-specific meta tags and configurations for optimal installation experience on iOS devices",
+      "acceptanceCriteria": [
+        "App can be added to iOS home screen with proper icon",
+        "App launches in fullscreen mode on iOS without Safari UI",
+        "Status bar styling matches app theme on iOS",
+        "Splash screen displays during app launch on iOS"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Add iOS-specific meta tags including apple-mobile-web-app-capable set to 'yes', apple-mobile-web-app-status-bar-style set to 'black-translucent' or theme-appropriate value, apple-mobile-web-app-title, apple-touch-icon links for various sizes (180x180 minimum), and apple-touch-startup-image links referencing frontend/public/assets/generated/splash-iphone.dim_750x1334.png and splash-ipad.dim_1536x2048.png with appropriate media queries for device targeting"
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Add toggle control to enable or disable AI remedy feature with persistent preference",
+      "summary": "Implement app-like navigation patterns with native-feeling transitions and gesture support",
       "acceptanceCriteria": [
-        "Toggle control is accessible in the chat interface or settings",
-        "When disabled, AI remedies are not generated or displayed",
-        "User preference persists across sessions",
-        "Toggle state is stored in user profile or local storage"
+        "Navigation feels smooth with app-like transitions",
+        "Swipe gestures work for appropriate navigation actions",
+        "Android hardware back button functions correctly",
+        "Navigation history is preserved across app restarts"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/Chat.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a toggle switch control to the chat page header that allows users to enable or disable the AI remedy feature. Wire the toggle to the user profile's aiRemedyEnabled field using the backend's getAIRemedyEnabled and setAIRemedyEnabled methods. When disabled, hide the AIConflictAnalysis component. Use shadcn/ui Switch component for consistent styling."
+          "description": "Add page transition animations using CSS transitions or Framer Motion, ensure router properly manages history stack, and implement popstate event listener for Android hardware back button support with proper cleanup"
+        },
+        {
+          "path": "frontend/src/hooks/useSwipeNavigation.ts",
+          "operation": "create",
+          "description": "Create custom hook that uses touch events to detect swipe gestures (touchstart, touchmove, touchend) and trigger navigation actions when swipe threshold is met, supporting left/right swipes for back/forward navigation with proper coordinate tracking"
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Integrate useSwipeNavigation hook to enable gesture-based navigation across the app, applying swipe handlers to appropriate container elements with proper touch-action CSS"
+        },
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Add CSS transition classes for page navigation animations including slide-in, slide-out, and fade effects with appropriate timing functions and durations for smooth app-like feel"
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add install prompt functionality with custom in-app installation banner",
+      "acceptanceCriteria": [
+        "Install banner appears when app meets PWA criteria",
+        "Users can dismiss or trigger installation from banner",
+        "Banner respects user preferences and doesn't reappear if dismissed",
+        "Installation success is tracked and banner hidden after install"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useInstallPrompt.ts",
+          "operation": "create",
+          "description": "Create custom hook that captures beforeinstallprompt event, stores the deferred prompt, provides showPrompt function to trigger installation, tracks installation state via appinstalled event, and manages localStorage for dismissed state with timestamp"
+        },
+        {
+          "path": "frontend/src/components/InstallPromptBanner.tsx",
+          "operation": "create",
+          "description": "Create banner component that uses useInstallPrompt hook to display installation invitation with clear call-to-action button, dismiss functionality that persists to localStorage, and automatic hiding after installation or dismissal"
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Import and conditionally render InstallPromptBanner component in layout, positioned prominently at top or bottom of viewport when installable and not dismissed"
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Optimize app performance for mobile devices with lazy loading, image optimization, and reduced bundle size",
+      "acceptanceCriteria": [
+        "Initial load time is under 3 seconds on 3G connection",
+        "Routes load on-demand rather than upfront",
+        "Images are properly compressed and use responsive formats",
+        "Loading indicators appear for operations taking >300ms"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Implement lazy loading for all route components using React.lazy and Suspense, wrapping each page import in lazy() with fallback loading component to reduce initial bundle size and enable code splitting"
+        },
+        {
+          "path": "frontend/src/components/LoadingSpinner.tsx",
+          "operation": "create",
+          "description": "Create reusable loading spinner component with consistent styling and animations for use in Suspense fallbacks and loading states across the application"
+        },
+        {
+          "path": "frontend/src/components/MediaGallery.tsx",
+          "operation": "modify",
+          "description": "Implement lazy loading for images using Intersection Observer or lazy loading attributes, add loading states during image fetch with LoadingSpinner, and ensure ExternalBlob.getDirectURL() usage for streaming and caching optimization"
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add loading states using LoadingSpinner for data-heavy widgets that take >300ms to load, ensuring smooth user experience during data fetching with proper skeleton screens or spinners"
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add query and mutation hooks for the AI remedy toggle: useGetAIRemedyEnabled to fetch the current state from the backend and useSetAIRemedyEnabled to update the preference. Ensure the preference persists in the user profile and invalidate relevant queries on update."
+          "description": "Review and optimize query configurations to add appropriate staleTime and cacheTime values, implement proper loading states, and ensure queries handle slow connections gracefully with timeout configurations"
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Implement responsive design improvements with touch-optimized tap targets and appropriate spacing",
+      "acceptanceCriteria": [
+        "All interactive elements meet minimum touch target size",
+        "Layout adapts smoothly across device sizes",
+        "No horizontal scrolling on any device",
+        "Text remains readable without zooming on all devices"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Add global CSS rules ensuring minimum touch target sizes of 44x44px for all interactive elements (buttons, links, form inputs), add touch-action properties for better gesture handling, and ensure proper spacing with mobile-first padding/margins"
         },
         {
-          "path": "frontend/src/pages/Settings.tsx",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Add a settings section with a toggle control for the AI remedy feature, mirroring the functionality available in the chat page. This provides an alternative access point for users who prefer to manage the setting from the settings page. Display the current state using the useGetAIRemedyEnabled query."
+          "description": "Add custom utility classes for touch targets, ensure responsive breakpoints cover all device sizes, add mobile-first spacing scale, and configure typography scale for optimal readability on small screens without zooming"
         },
         {
-          "path": "frontend/src/components/AIConflictAnalysis.tsx",
+          "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Update the component to respect the AI remedy enabled state. When the toggle is off, display a message indicating that AI remedies are disabled instead of showing conflict analysis. Fetch the toggle state using the useGetAIRemedyEnabled query hook."
+          "description": "Review and enhance responsive layout with proper viewport handling, ensure navigation bar is touch-friendly with adequate tap target spacing, and implement mobile-first responsive grid for content areas"
+        },
+        {
+          "path": "frontend/src/components/ChatWidget.tsx",
+          "operation": "modify",
+          "description": "Ensure chat widget buttons and input areas meet minimum touch target requirements, improve mobile layout with proper spacing, and optimize draggable behavior for touch interactions"
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Enhance dashboard grid layout responsiveness across device sizes, ensure widgets stack properly on mobile with adequate spacing, and verify all interactive elements meet touch target size requirements"
         }
       ]
     }
