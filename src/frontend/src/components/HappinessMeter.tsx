@@ -23,7 +23,7 @@ export default function HappinessMeter() {
     return <Frown className="h-8 w-8" />;
   };
 
-  const score = happinessScore || 75;
+  const score = Number(happinessScore || 75);
 
   return (
     <Card className="border-warm-200 shadow-md">

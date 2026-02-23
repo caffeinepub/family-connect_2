@@ -8,13 +8,11 @@ import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Storage "blob-storage/Storage";
-
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
-import Migration "migration"; // Import Migration module
+import Iter "mo:core/Iter";
 
-(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -55,8 +53,8 @@ actor {
     location : ?Location;
     role : ?Role;
     lastUpdate : Int;
-    parents : [FamilyMember]; // Up to 2 parents
-    children : [FamilyMember]; // Dynamic list of children
+    parents : [FamilyMember];
+    children : [FamilyMember];
     totalExpenses : Expenses;
   };
 
@@ -108,14 +106,20 @@ actor {
     #socialMediaLink;
   };
 
+  public type ChatType = {
+    #privateChat;
+    #group;
+  };
+
   public type Message = {
     author : Principal;
-    receiver : Principal;
     text : Text;
     messageType : MessageType;
     groceryItems : ?[Text];
     socialMediaUrl : ?Text;
     timestamp : Int;
+    chatType : ChatType;
+    recipientId : ?Principal;
   };
 
   module Update {
@@ -170,7 +174,7 @@ actor {
     asrCompatibilityScore : ?Nat;
   };
 
-  public type ASRFilter = { // Adaptive Study Recommendation
+  public type ASRFilter = {
     fromProfessionals : Bool;
     fromParentalCaregivers : Bool;
     fromPeers : Bool;
@@ -495,7 +499,7 @@ actor {
   var fightsSolved = 0 : Nat;
   var fightsCreated = 0 : Nat;
 
-  private func isParent(caller : Principal) : Bool {
+  func isParent(caller : Principal) : Bool {
     switch (userProfiles.get(caller)) {
       case (null) { false };
       case (?profile) {
@@ -508,7 +512,7 @@ actor {
     };
   };
 
-  private func isChild(caller : Principal) : Bool {
+  func isChild(caller : Principal) : Bool {
     switch (userProfiles.get(caller)) {
       case (null) { false };
       case (?profile) {
@@ -521,16 +525,50 @@ actor {
     };
   };
 
+  func getFamilyMembers(caller : Principal) : [Principal] {
+    switch (userProfiles.get(caller)) {
+      case (null) { [] };
+      case (?profile) {
+        let parentPrincipals = profile.parents.map(func(p : FamilyMember) : Principal { p.principal });
+        let childPrincipals = profile.children.map(func(c : FamilyMember) : Principal { c.principal });
+        parentPrincipals.concat(childPrincipals);
+      };
+    };
+  };
+
+  func areFamilyMembers(user1 : Principal, user2 : Principal) : Bool {
+    if (user1 == user2) {
+      return true;
+    };
+
+    let user1Family = getFamilyMembers(user1);
+    let user2Family = getFamilyMembers(user2);
+
+    for (member in user1Family.vals()) {
+      if (member == user2) {
+        return true;
+      };
+    };
+
+    for (member in user2Family.vals()) {
+      if (member == user1) {
+        return true;
+      };
+    };
+
+    false;
+  };
+
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+      Runtime.trap("Unauthorized: Only users can get profiles");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+      Runtime.trap("Unauthorized: Only users can get profiles");
     };
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
@@ -550,28 +588,20 @@ actor {
       Runtime.trap("Unauthorized: Only users can update profiles");
     };
 
-    // If current profile exists, check for role changes
     let currentProfile = userProfiles.get(caller);
 
-    // Validate role changes: allow parent->child, block child->parent
     switch (currentProfile) {
       case (?existing) {
         switch (existing.role, profile.role) {
-          // Current role is child, new role is parent -> BLOCK (privilege escalation)
           case (?(#child), ?(#parent)) {
             Runtime.trap("Unauthorized: Cannot change role from child to parent");
           };
-          // Current role is parent, new role is child -> ALLOW (downgrade)
           case (?(#parent), ?(#child)) {
-            // This is allowed
+            Runtime.trap("Unauthorized: Cannot change role from parent to child");
           };
-          // All other combinations are allowed (same role, null, etc.)
-          case (_, _) {
-            // Allowed
-          };
+          case (_, _) {};
         };
       };
-      // No existing profile, any role is allowed for first-time setup
       case (null) {};
     };
 
@@ -582,6 +612,14 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create profiles");
     };
+
+    switch (userProfiles.get(caller)) {
+      case (?_) {
+        Runtime.trap("Profile already exists for this user");
+      };
+      case (null) {};
+    };
+
     let educationalData : EducationalData = {
       classroomCommunication = [];
       questionPapers = [];
@@ -617,6 +655,10 @@ actor {
       Runtime.trap("Unauthorized: Only users can add parents");
     };
 
+    if (not isChild(caller)) {
+      Runtime.trap("Unauthorized: Only children can add parents");
+    };
+
     let currentProfile = switch (userProfiles.get(caller)) {
       case (null) { Runtime.trap("User profile not found") };
       case (?profile) { profile };
@@ -626,10 +668,14 @@ actor {
       Runtime.trap("Cannot add more than 2 parents");
     };
 
-    // Verify that the parent principal exists and has a profile
-    switch (userProfiles.get(parentPrincipal)) {
+    let parentProfile = switch (userProfiles.get(parentPrincipal)) {
       case (null) { Runtime.trap("Parent profile does not exist") };
-      case (?_) { /* Parent exists, continue */ };
+      case (?profile) { profile };
+    };
+
+    switch (parentProfile.role) {
+      case (?(#parent)) {};
+      case (_) { Runtime.trap("Target user is not a parent") };
     };
 
     let newParent : FamilyMember = {
@@ -647,12 +693,21 @@ actor {
       Runtime.trap("Unauthorized: Only users can remove parents");
     };
 
+    if (not isChild(caller)) {
+      Runtime.trap("Unauthorized: Only children can remove parents");
+    };
+
     let currentProfile = switch (userProfiles.get(caller)) {
       case (null) { Runtime.trap("User profile not found") };
       case (?profile) { profile };
     };
 
     let filteredParents = currentProfile.parents.filter(func(parent) { parent.principal != parentPrincipal });
+    
+    if (filteredParents.size() == currentProfile.parents.size()) {
+      Runtime.trap("Parent not found in your family");
+    };
+
     let updatedProfile = { currentProfile with parents = filteredParents };
     userProfiles.add(caller, updatedProfile);
   };
@@ -662,7 +717,6 @@ actor {
       Runtime.trap("Unauthorized: Only users can add children");
     };
 
-    // Only parents can add children
     if (not isParent(caller)) {
       Runtime.trap("Unauthorized: Only parents can add children");
     };
@@ -672,10 +726,14 @@ actor {
       case (?profile) { profile };
     };
 
-    // Verify that the child principal exists and has a profile
-    switch (userProfiles.get(childPrincipal)) {
+    let childProfile = switch (userProfiles.get(childPrincipal)) {
       case (null) { Runtime.trap("Child profile does not exist") };
-      case (?_) { /* Child exists, continue */ };
+      case (?profile) { profile };
+    };
+
+    switch (childProfile.role) {
+      case (?(#child)) {};
+      case (_) { Runtime.trap("Target user is not a child") };
     };
 
     let newChild : FamilyMember = {
@@ -693,7 +751,6 @@ actor {
       Runtime.trap("Unauthorized: Only users can remove children");
     };
 
-    // Only parents can remove children
     if (not isParent(caller)) {
       Runtime.trap("Unauthorized: Only parents can remove children");
     };
@@ -704,6 +761,11 @@ actor {
     };
 
     let filteredChildren = currentProfile.children.filter(func(child) { child.principal != childPrincipal });
+    
+    if (filteredChildren.size() == currentProfile.children.size()) {
+      Runtime.trap("Child not found in your family");
+    };
+
     let updatedProfile = { currentProfile with children = filteredChildren };
     userProfiles.add(caller, updatedProfile);
   };
@@ -713,7 +775,6 @@ actor {
       Runtime.trap("Unauthorized: Only users can add expenses");
     };
 
-    // Only parents can add expenses
     if (not isParent(caller)) {
       Runtime.trap("Unauthorized: Only parents can add expenses");
     };
@@ -756,6 +817,10 @@ actor {
       Runtime.trap("Unauthorized: Only users can view expense summaries");
     };
 
+    if (not isParent(caller)) {
+      Runtime.trap("Unauthorized: Only parents can view expense summaries");
+    };
+
     switch (userProfiles.get(caller)) {
       case (null) { Runtime.trap("User profile not found") };
       case (?profile) { profile.totalExpenses };
@@ -773,6 +838,16 @@ actor {
 
     if (child == caller) {
       Runtime.trap("Cannot invite yourself");
+    };
+
+    let childProfile = switch (userProfiles.get(child)) {
+      case (null) { Runtime.trap("Child profile does not exist") };
+      case (?profile) { profile };
+    };
+
+    switch (childProfile.role) {
+      case (?(#child)) {};
+      case (_) { Runtime.trap("Target user is not a child") };
     };
 
     let token = child.toText().concat(caller.toText()).concat(Time.now().toText());
@@ -797,12 +872,18 @@ actor {
       Runtime.trap("Unauthorized: Only users can validate invitations");
     };
 
-    if (not isChild(caller)) {
-      Runtime.trap("Unauthorized: Only children can validate invitations");
-    };
-
     if (child != caller) {
       Runtime.trap("Unauthorized: Can only validate invitations for yourself");
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) { profile };
+    };
+
+    switch (callerProfile.role) {
+      case (?(#child)) {};
+      case (_) { Runtime.trap("Unauthorized: Only children can validate invitations") };
     };
 
     let invitation = switch (invitationTokens.get(token)) {
@@ -833,33 +914,54 @@ actor {
     };
 
     let invitations = invitationTokens.toArray().map(func((_, invitation)) { invitation });
-    
-    // Filter to only invitations relevant to the caller (either as parent or child)
+
     let relevantInvitations = invitations.filter(func(invitation) {
       (invitation.parentPrincipal == caller or invitation.childPrincipal == caller) and
-      Time.now() <= invitation.expires and 
+      Time.now() <= invitation.expires and
       invitation.isValid
     });
-    
+
     relevantInvitations;
   };
 
-  // Backend message handler for new data structure
   public shared ({ caller }) func sendMessage(
-    receiver : Principal,
     text : Text,
     messageType : MessageType,
     groceryItems : ?[Text],
-    socialMediaUrl : ?Text
+    socialMediaUrl : ?Text,
+    chatType : ChatType,
+    recipientId : ?Principal,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can send messages");
     };
 
-    // Validate that receiver exists
-    switch (userProfiles.get(receiver)) {
-      case (null) { Runtime.trap("Receiver profile does not exist") };
-      case (?_) { /* Receiver exists, continue */ };
+    if (chatType == #privateChat and recipientId == null) {
+      Runtime.trap("Recipient ID must be provided for private messages");
+    };
+
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) { profile };
+    };
+
+    let familyMembers = getFamilyMembers(caller);
+    if (familyMembers.size() == 0) {
+      Runtime.trap("Unauthorized: You must be part of a family to send messages");
+    };
+
+    switch (chatType) {
+      case (#privateChat) {
+        switch (recipientId) {
+          case (null) { Runtime.trap("Recipient ID must be provided for private messages") };
+          case (?recipient) {
+            if (not areFamilyMembers(caller, recipient)) {
+              Runtime.trap("Unauthorized: Can only send private messages to family members");
+            };
+          };
+        };
+      };
+      case (#group) {};
     };
 
     switch (messageType) {
@@ -888,12 +990,13 @@ actor {
 
     let message : Message = {
       author = caller;
-      receiver;
       text;
       messageType;
       groceryItems;
       socialMediaUrl;
       timestamp = Time.now();
+      chatType;
+      recipientId;
     };
 
     messages.add(message);
@@ -904,12 +1007,146 @@ actor {
       Runtime.trap("Unauthorized: Only users can get message history");
     };
 
-    // Filter messages to only those where caller is author or receiver
+    let callerProfile = switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) { profile };
+    };
+
+    let familyMembers = getFamilyMembers(caller);
+
     let allMessages = messages.toArray();
+
     let userMessages = allMessages.filter(func(msg) {
-      msg.author == caller or msg.receiver == caller
+      if (msg.chatType == #group) {
+        if (msg.author == caller) {
+          return true;
+        };
+        return areFamilyMembers(caller, msg.author);
+      };
+
+      if (msg.chatType == #privateChat) {
+        switch (msg.recipientId) {
+          case (null) { false };
+          case (?recipient) {
+            let isParticipant = (msg.author == caller or recipient == caller);
+            let areFamilyMembersCheck = areFamilyMembers(msg.author, recipient);
+            isParticipant and areFamilyMembersCheck;
+          };
+        };
+      } else {
+        false;
+      };
     });
-    
+
     userMessages;
   };
+
+  public shared ({ caller }) func deleteAccount() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete accounts");
+    };
+
+    switch (userProfiles.get(caller)) {
+      case (null) {
+        Runtime.trap("User profile not found. No account to delete");
+      };
+      case (?_) {
+        // Remove user profile
+        userProfiles.remove(caller);
+
+        // Remove educational data
+        educationalDataMap.remove(caller);
+
+        // Remove all family connections related to caller
+        for ((principal, _) in userProfiles.entries()) {
+          let currentProfile = userProfiles.get(principal);
+          switch (currentProfile) {
+            case (null) { () };
+            case (?profile) {
+              let updatedParents = profile.parents.filter(func(parent) { parent.principal != caller });
+              let updatedChildren = profile.children.filter(func(child) { child.principal != caller });
+
+              userProfiles.add(
+                principal,
+                {
+                  profile with
+                  parents = updatedParents;
+                  children = updatedChildren
+                },
+              );
+            };
+          };
+        };
+
+        // Remove messages sent by caller or addressed to caller
+        let remainingMessages = messages.filter(func(message) { 
+          message.author != caller and (
+            switch (message.recipientId) {
+              case (null) { true };
+              case (?recipient) { recipient != caller };
+            }
+          )
+        });
+        messages.clear();
+        messages.addAll(remainingMessages.values());
+
+        // Remove updates created by caller
+        let remainingUpdates = updates.filter(func(update) { update.author != caller });
+        updates.clear();
+        updates.addAll(remainingUpdates.values());
+
+        // Remove media posts created by caller
+        let remainingMedia = mediaPosts.filter(func(media) { media.author != caller });
+        mediaPosts.clear();
+        mediaPosts.addAll(remainingMedia.values());
+
+        // Remove reminders created by caller
+        let remainingReminders = reminders.filter(func(reminder) { reminder.creator != caller });
+        reminders.clear();
+        reminders.addAll(remainingReminders.values());
+
+        // Remove permission requests where caller is child or parent
+        let permissionRequestsToRemove = permissionRequests.filter(
+          func(_id, request) {
+            request.child == caller or request.parent == caller
+          }
+        );
+        for ((id, _) in permissionRequestsToRemove.entries()) {
+          permissionRequests.remove(id);
+        };
+
+        // Remove invitations where caller is parent or child
+        for ((token, invitation) in invitationTokens.entries()) {
+          if (
+            invitation.childPrincipal == caller or invitation.parentPrincipal == caller
+          ) {
+            invitationTokens.remove(token);
+          };
+        };
+
+        // Remove any study materials or documents owned by the caller
+        let documentsToRemove = documentMetadataMap.filter(
+          func(_id, doc) {
+            doc.owner == caller
+          }
+        );
+        for ((id, _) in documentsToRemove.entries()) {
+          documentMetadataMap.remove(id);
+        };
+
+        // Remove parent feedback created by caller
+        let feedbackToRemove = parentFeedbackMap.filter(
+          func(_id, feedback) {
+            feedback.parentId == caller.toText()
+          }
+        );
+        for ((id, _) in feedbackToRemove.entries()) {
+          parentFeedbackMap.remove(id);
+        };
+
+        // Account deletion completed successfully - no trap, just return
+      };
+    };
+  };
 };
+

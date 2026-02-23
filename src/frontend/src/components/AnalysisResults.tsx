@@ -1,15 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { useGetStudyTips, useGetAIReviews } from '../hooks/useQueries';
+import { useGetStudyTips, useGetAIReviews, useGetICTechnologyTips } from '../hooks/useQueries';
 import { Loader2, Lightbulb, TrendingUp, BookOpen } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { Badge } from './ui/badge';
 
 export default function AnalysisResults() {
   const { data: studyTips, isLoading: tipsLoading } = useGetStudyTips();
-  const { data: aiReviews, isLoading: reviewsLoading } = useGetAIReviews();
-
-  const performanceReviews = aiReviews?.[0] || [];
-  const technologyTips = aiReviews?.[1] || [];
+  const { data: performanceReviews, isLoading: reviewsLoading } = useGetAIReviews();
+  const { data: technologyTips, isLoading: techTipsLoading } = useGetICTechnologyTips();
 
   const getAnalysisLevelLabel = (level: { basic?: null; intermediate?: null; advanced?: null }) => {
     if ('advanced' in level) return 'Advanced Analysis';
@@ -119,7 +117,7 @@ export default function AnalysisResults() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {reviewsLoading ? (
+          {techTipsLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
             </div>

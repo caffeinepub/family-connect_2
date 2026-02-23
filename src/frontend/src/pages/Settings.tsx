@@ -1,381 +1,305 @@
 import { useState } from 'react';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { 
-  useGetCallerUserProfile, 
-  useRemoveParent, 
-  useRemoveChild,
-  useCreateFamilyInvitation,
-  useGetActiveFamilyInvitations,
-  useUpdateUserProfile
-} from '../hooks/useQueries';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Copy, Trash2, Loader2, Check, UserPlus, Link as LinkIcon, ArrowDown, AlertTriangle } from 'lucide-react';
-import { toast } from 'sonner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Separator } from '../components/ui/separator';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
+import { useGetCallerUserProfile, useUpdateUserProfile, useCreateFamilyInvitation, useGetActiveFamilyInvitations, useDeleteAccount } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { Principal } from '@dfinity/principal';
+import { Loader2, Copy, Check, UserCircle, Users, Trash2, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Role } from '../backend';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '../components/ui/alert-dialog';
 
 export default function Settings() {
-  const { identity } = useInternetIdentity();
+  const { identity, clear } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
-  const removeParent = useRemoveParent();
-  const removeChild = useRemoveChild();
+  const updateProfile = useUpdateUserProfile();
   const createInvitation = useCreateFamilyInvitation();
   const { data: activeInvitations } = useGetActiveFamilyInvitations();
-  const updateProfile = useUpdateUserProfile();
+  const deleteAccount = useDeleteAccount();
 
-  const [invitationHours, setInvitationHours] = useState('24');
-  const [generatedInviteLink, setGeneratedInviteLink] = useState<string | null>(null);
-  const [copiedInvite, setCopiedInvite] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
 
-  const parents = userProfile?.parents || [];
-  const children = userProfile?.children || [];
-  const canAddParent = parents.length < 2;
+  const isAuthenticated = !!identity;
   const isParent = userProfile?.role === Role.parent;
 
-  const handleRemoveParent = async (principal: any) => {
-    try {
-      await removeParent.mutateAsync(principal);
-      toast.success('Parent removed successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to remove parent');
-    }
-  };
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userProfile || !displayName.trim()) return;
 
-  const handleRemoveChild = async (principal: any) => {
     try {
-      await removeChild.mutateAsync(principal);
-      toast.success('Child removed successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to remove child');
-    }
-  };
-
-  const handleGenerateInvitation = async (roleType: 'parent' | 'child') => {
-    try {
-      const hours = parseInt(invitationHours);
-      const token = await createInvitation.mutateAsync({ 
-        validationTimeHours: BigInt(hours),
-        roleType 
+      await updateProfile.mutateAsync({
+        ...userProfile,
+        displayName: displayName.trim(),
       });
-      
-      const inviteUrl = `${window.location.origin}?invite=${token}`;
-      setGeneratedInviteLink(inviteUrl);
-      toast.success(`${roleType === 'parent' ? 'Parent' : 'Child'} invitation link generated!`);
+      toast.success('Profile updated successfully');
+      setDisplayName('');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update profile');
+    }
+  };
+
+  const handleGenerateInvite = async () => {
+    if (!identity) return;
+
+    setIsGeneratingInvite(true);
+    try {
+      const childPrincipal = identity.getPrincipal();
+      const token = await createInvitation.mutateAsync({
+        child: childPrincipal,
+        validationTimeHours: BigInt(72),
+      });
+
+      const inviteUrl = `${window.location.origin}#invite=${token}`;
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopiedToken(token);
+      toast.success('Invitation link copied to clipboard!');
+
+      setTimeout(() => setCopiedToken(null), 3000);
     } catch (error: any) {
       toast.error(error.message || 'Failed to generate invitation');
+    } finally {
+      setIsGeneratingInvite(false);
     }
   };
 
-  const handleCopyInviteLink = async () => {
-    if (!generatedInviteLink) return;
-    
-    try {
-      await navigator.clipboard.writeText(generatedInviteLink);
-      setCopiedInvite(true);
-      toast.success('Invitation link copied to clipboard!');
-      setTimeout(() => setCopiedInvite(false), 2000);
-    } catch (error) {
-      toast.error('Failed to copy invitation link');
-    }
+  const handleCopyInvite = async (token: string) => {
+    const inviteUrl = `${window.location.origin}#invite=${token}`;
+    await navigator.clipboard.writeText(inviteUrl);
+    setCopiedToken(token);
+    toast.success('Invitation link copied!');
+    setTimeout(() => setCopiedToken(null), 3000);
   };
 
-  const handleChangeRoleToChild = async () => {
-    if (!userProfile) return;
-
+  const handleDeleteAccount = async () => {
     try {
-      const updatedProfile = {
-        ...userProfile,
-        role: Role.child,
-      };
-      
-      await updateProfile.mutateAsync(updatedProfile);
-      toast.success('Your role has been changed to Child');
+      await deleteAccount.mutateAsync();
+      await clear();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to change role');
+      console.error('Delete account error:', error);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <Card className="border-warm-200">
+          <CardContent className="py-12">
+            <p className="text-center text-muted-foreground">Please log in to access settings</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-12 w-12 animate-spin text-warm-500" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-warm-900 dark:text-warm-100">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your family connections and invite new members</p>
+        <h1 className="text-3xl font-bold text-warm-900 dark:text-warm-100 mb-2">Settings</h1>
+        <p className="text-muted-foreground">Manage your account and family connections</p>
       </div>
 
-      {/* Role Change Section - Only for Parents */}
-      {isParent && (
-        <Card className="border-amber-200 dark:border-amber-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ArrowDown className="h-5 w-5 text-amber-600" />
-              Change Your Role
-            </CardTitle>
-            <CardDescription>
-              Switch from Parent to Child role
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg space-y-3">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                <div className="space-y-2 flex-1">
-                  <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                    Important: This action cannot be reversed
-                  </p>
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
-                    Changing your role from Parent to Child will remove your parent privileges. You will no longer be able to:
-                  </p>
-                  <ul className="text-sm text-amber-800 dark:text-amber-200 list-disc list-inside space-y-1 ml-2">
-                    <li>Invite or manage children</li>
-                    <li>Add expenses</li>
-                    <li>Approve permission requests</li>
-                    <li>Access parent-only features</li>
-                    <li>Change back to Parent role</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/20"
-                  disabled={updateProfile.isPending}
-                >
-                  {updateProfile.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Changing Role...
-                    </>
-                  ) : (
-                    <>
-                      <ArrowDown className="mr-2 h-4 w-4" />
-                      Change to Child Role
-                    </>
-                  )}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2">
-                    <p>
-                      This will permanently change your role from <strong>Parent</strong> to <strong>Child</strong>.
-                    </p>
-                    <p className="text-destructive font-medium">
-                      This action cannot be undone. You will not be able to change back to Parent role.
-                    </p>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleChangeRoleToChild}
-                    className="bg-amber-600 hover:bg-amber-700"
-                  >
-                    Yes, Change My Role
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Invitation System */}
-      <Card>
+      {/* Profile Information */}
+      <Card className="border-warm-200 shadow-md">
         <CardHeader>
-          <CardTitle>Invite Family Members</CardTitle>
-          <CardDescription>
-            Generate invitation links to add parents or children to your family
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <Label htmlFor="inviteHours">Invitation Valid For</Label>
-            <Select value={invitationHours} onValueChange={setInvitationHours}>
-              <SelectTrigger id="inviteHours">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 hour</SelectItem>
-                <SelectItem value="6">6 hours</SelectItem>
-                <SelectItem value="24">24 hours</SelectItem>
-                <SelectItem value="72">3 days</SelectItem>
-                <SelectItem value="168">1 week</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex gap-2">
-            {canAddParent && (
-              <Button
-                onClick={() => handleGenerateInvitation('parent')}
-                disabled={createInvitation.isPending}
-                className="flex-1"
-                variant="outline"
-              >
-                {createInvitation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Invite Parent
-                  </>
-                )}
-              </Button>
-            )}
-            {isParent && (
-              <Button
-                onClick={() => handleGenerateInvitation('child')}
-                disabled={createInvitation.isPending}
-                className="flex-1"
-                variant="outline"
-              >
-                {createInvitation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Invite Child
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-
-          {generatedInviteLink && (
-            <div className="space-y-2 p-4 bg-muted rounded-lg">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <LinkIcon className="h-4 w-4" />
-                Generated Invitation Link
-              </div>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 px-3 py-2 bg-background rounded text-xs font-mono break-all">
-                  {generatedInviteLink}
-                </code>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleCopyInviteLink}
-                  className="shrink-0"
-                >
-                  {copiedInvite ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Share this link with your family member. They'll be automatically connected when they sign in.
-              </p>
-            </div>
-          )}
-
-          {!canAddParent && !isParent && (
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-              <p className="text-sm text-amber-800 dark:text-amber-200">
-                You've reached the maximum of 2 parents and only parents can invite children.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Parents Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Parents {!canAddParent && <span className="text-sm font-normal text-muted-foreground">(Maximum 2)</span>}
+          <CardTitle className="flex items-center gap-2">
+            <UserCircle className="h-5 w-5 text-warm-500" />
+            Profile Information
           </CardTitle>
-          <CardDescription>Your connected parent accounts</CardDescription>
+          <CardDescription>Update your personal information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {parents.length > 0 ? (
+          <div className="space-y-2">
+            <Label>Current Name</Label>
+            <p className="text-sm font-medium">{userProfile?.displayName}</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Role</Label>
+            <p className="text-sm font-medium capitalize">{userProfile?.role || 'Not set'}</p>
+          </div>
+          <Separator />
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
             <div className="space-y-2">
-              {parents.map((parent, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{parent.name}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveParent(parent.principal)}
-                    disabled={removeParent.isPending}
-                    className="shrink-0 ml-2"
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              ))}
+              <Label htmlFor="displayName">Update Display Name</Label>
+              <Input
+                id="displayName"
+                placeholder="Enter new name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="border-warm-200"
+              />
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No parents connected yet. Generate an invitation link above to invite parents.</p>
-          )}
+            <Button
+              type="submit"
+              disabled={updateProfile.isPending || !displayName.trim()}
+              className="bg-warm-500 hover:bg-warm-600"
+            >
+              {updateProfile.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Profile'
+              )}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
-      {/* Children Section */}
-      {isParent && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Children <span className="text-sm font-normal text-muted-foreground">({children.length} total)</span>
-            </CardTitle>
-            <CardDescription>Your connected child accounts</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {children.length > 0 ? (
+      {/* Family Members */}
+      <Card className="border-warm-200 shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-warm-500" />
+            Family Members
+          </CardTitle>
+          <CardDescription>Your connected family members</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {userProfile?.parents && userProfile.parents.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Parents</Label>
               <div className="space-y-2">
-                {children.map((child, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{child.name}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveChild(child.principal)}
-                      disabled={removeChild.isPending}
-                      className="shrink-0 ml-2"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                {userProfile.parents.map((parent) => (
+                  <div key={parent.principal.toString()} className="flex items-center justify-between p-3 bg-warm-50 dark:bg-warm-900 rounded-lg">
+                    <span className="text-sm font-medium">{parent.name}</span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No children connected yet. Generate an invitation link above to invite children.</p>
+            </div>
+          )}
+
+          {userProfile?.children && userProfile.children.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Children</Label>
+              <div className="space-y-2">
+                {userProfile.children.map((child) => (
+                  <div key={child.principal.toString()} className="flex items-center justify-between p-3 bg-warm-50 dark:bg-warm-900 rounded-lg">
+                    <span className="text-sm font-medium">{child.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(!userProfile?.parents || userProfile.parents.length === 0) &&
+            (!userProfile?.children || userProfile.children.length === 0) && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No family members connected yet
+              </p>
+            )}
+        </CardContent>
+      </Card>
+
+      {/* Invitation Management - Parent Only */}
+      {isParent && (
+        <Card className="border-warm-200 shadow-md">
+          <CardHeader>
+            <CardTitle>Family Invitations</CardTitle>
+            <CardDescription>Generate invitation links for your children</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={handleGenerateInvite}
+              disabled={isGeneratingInvite}
+              className="w-full bg-warm-500 hover:bg-warm-600"
+            >
+              {isGeneratingInvite ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                'Generate New Invitation Link'
+              )}
+            </Button>
+
+            {activeInvitations && activeInvitations.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Active Invitations</Label>
+                <div className="space-y-2">
+                  {activeInvitations.map((invitation) => (
+                    <div key={invitation.token} className="flex items-center justify-between p-3 bg-warm-50 dark:bg-warm-900 rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">
+                          Expires: {new Date(Number(invitation.expires) / 1000000).toLocaleString()}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyInvite(invitation.token)}
+                      >
+                        {copiedToken === invitation.token ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
       )}
+
+      {/* Danger Zone */}
+      <Card className="border-red-200 shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            Danger Zone
+          </CardTitle>
+          <CardDescription>Irreversible actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription className="space-y-2">
+                  <p>This action cannot be undone. This will permanently delete your account and remove all your data from our servers.</p>
+                  <p className="font-semibold text-red-600">All your messages, expenses, and family connections will be lost.</p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteAccount} className="bg-red-600 hover:bg-red-700">
+                  {deleteAccount.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete Account'
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }

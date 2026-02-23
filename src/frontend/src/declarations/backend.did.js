@@ -74,6 +74,10 @@ export const MessageType = IDL.Variant({
   'socialMediaLink' : IDL.Null,
   'groceryList' : IDL.Null,
 });
+export const ChatType = IDL.Variant({
+  'privateChat' : IDL.Null,
+  'group' : IDL.Null,
+});
 export const Message = IDL.Record({
   'socialMediaUrl' : IDL.Opt(IDL.Text),
   'text' : IDL.Text,
@@ -81,7 +85,8 @@ export const Message = IDL.Record({
   'messageType' : MessageType,
   'groceryItems' : IDL.Opt(IDL.Vec(IDL.Text)),
   'timestamp' : IDL.Int,
-  'receiver' : IDL.Principal,
+  'chatType' : ChatType,
+  'recipientId' : IDL.Opt(IDL.Principal),
 });
 
 export const idlService = IDL.Service({
@@ -122,6 +127,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'createProfile' : IDL.Func([IDL.Text, Role], [], []),
+  'deleteAccount' : IDL.Func([], [], []),
   'getActiveFamilyInvitations' : IDL.Func(
       [],
       [IDL.Vec(FamilyInvitation)],
@@ -142,11 +148,12 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'sendMessage' : IDL.Func(
       [
-        IDL.Principal,
         IDL.Text,
         MessageType,
         IDL.Opt(IDL.Vec(IDL.Text)),
         IDL.Opt(IDL.Text),
+        ChatType,
+        IDL.Opt(IDL.Principal),
       ],
       [],
       [],
@@ -228,6 +235,10 @@ export const idlFactory = ({ IDL }) => {
     'socialMediaLink' : IDL.Null,
     'groceryList' : IDL.Null,
   });
+  const ChatType = IDL.Variant({
+    'privateChat' : IDL.Null,
+    'group' : IDL.Null,
+  });
   const Message = IDL.Record({
     'socialMediaUrl' : IDL.Opt(IDL.Text),
     'text' : IDL.Text,
@@ -235,7 +246,8 @@ export const idlFactory = ({ IDL }) => {
     'messageType' : MessageType,
     'groceryItems' : IDL.Opt(IDL.Vec(IDL.Text)),
     'timestamp' : IDL.Int,
-    'receiver' : IDL.Principal,
+    'chatType' : ChatType,
+    'recipientId' : IDL.Opt(IDL.Principal),
   });
   
   return IDL.Service({
@@ -276,6 +288,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'createProfile' : IDL.Func([IDL.Text, Role], [], []),
+    'deleteAccount' : IDL.Func([], [], []),
     'getActiveFamilyInvitations' : IDL.Func(
         [],
         [IDL.Vec(FamilyInvitation)],
@@ -296,11 +309,12 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'sendMessage' : IDL.Func(
         [
-          IDL.Principal,
           IDL.Text,
           MessageType,
           IDL.Opt(IDL.Vec(IDL.Text)),
           IDL.Opt(IDL.Text),
+          ChatType,
+          IDL.Opt(IDL.Principal),
         ],
         [],
         [],

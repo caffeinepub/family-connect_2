@@ -1,188 +1,136 @@
 {
   "kind": "build_request",
-  "title": "Add grocery items and social media link sharing to chat",
-  "priority": "normal",
+  "title": "Diagnose and fix deployment error preventing successful build",
+  "projectName": "FamilyConnect",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-71",
-      "text": "Update the Message data type in backend/main.mo to support a new messageType field with variants for text, groceryList, and socialMediaLink",
+      "id": "REQ-117",
+      "text": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "ERROR IS THERE",
+          "RECONSTRUCT"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Build logs are reviewed to identify the exact error message and stack trace",
+        "The root cause of the deployment failure is identified (backend compilation error, frontend build error, or deployment configuration issue)",
+        "Error is documented with specific file paths and line numbers if applicable"
+      ]
+    },
+    {
+      "id": "REQ-118",
+      "text": "Fix any Motoko compilation errors in backend/main.mo that are preventing successful backend build",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "in the chat give feature to send grocerie items and send social media links"
+          "ERROR IS THERE"
         ]
       },
       "acceptanceCriteria": [
-        "Message type includes a variant field that can be 'text', 'groceryList', or 'socialMediaLink'",
-        "Existing text messages continue to work without breaking changes",
-        "The messageType field is properly serialized and deserialized"
+        "All Motoko syntax errors are resolved",
+        "Type mismatches and undefined variables are fixed",
+        "Backend compiles successfully without errors",
+        "All existing backend methods remain functional"
       ]
     },
     {
-      "id": "REQ-72",
-      "text": "Extend the Message data structure in backend/main.mo to include an optional groceryItems field that stores an array of grocery item strings when messageType is groceryList",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "send grocerie items"
-        ]
-      },
-      "acceptanceCriteria": [
-        "groceryItems field accepts an array of text strings",
-        "Field is only populated when messageType is 'groceryList'",
-        "Backend stores and retrieves grocery items correctly"
-      ]
-    },
-    {
-      "id": "REQ-73",
-      "text": "Extend the Message data structure in backend/main.mo to include an optional socialMediaUrl field that stores the URL string when messageType is socialMediaLink",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "send social media links"
-        ]
-      },
-      "acceptanceCriteria": [
-        "socialMediaUrl field accepts a text string containing the URL",
-        "Field is only populated when messageType is 'socialMediaLink'",
-        "Backend stores and retrieves social media URLs correctly"
-      ]
-    },
-    {
-      "id": "REQ-74",
-      "text": "Update the backend sendMessage method in main.mo to accept and validate grocery item arrays and social media URLs based on the messageType parameter",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "sendMessage accepts messageType, groceryItems, and socialMediaUrl parameters",
-        "Validation ensures groceryItems is provided when messageType is 'groceryList'",
-        "Validation ensures socialMediaUrl is provided when messageType is 'socialMediaLink'",
-        "Method returns appropriate error messages for invalid input"
-      ]
-    },
-    {
-      "id": "REQ-75",
-      "text": "Update the useSendMessage mutation hook in frontend/src/hooks/useQueries.ts to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Hook accepts optional groceryItems and socialMediaUrl in mutation variables",
-        "Hook properly serializes grocery items array and social media URL for backend",
-        "Mutation invalidates message queries after successful send"
-      ]
-    },
-    {
-      "id": "REQ-76",
-      "text": "Add a grocery list composer UI in the Chat page (frontend/src/pages/Chat.tsx) that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
+      "id": "REQ-119",
+      "text": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "send grocerie items"
+          "ERROR IS THERE"
         ]
       },
       "acceptanceCriteria": [
-        "Users can type grocery item names and add them to a temporary list",
-        "UI shows all items in the current grocery list with remove buttons",
-        "A 'Send Grocery List' button sends all items as a single groceryList message",
-        "The grocery list UI clears after successful send"
+        "All TypeScript type errors are resolved",
+        "Import statements and module paths are correct",
+        "React component syntax errors are fixed",
+        "Frontend builds successfully without errors",
+        "All existing components render without runtime errors"
       ]
     },
     {
-      "id": "REQ-77",
-      "text": "Add a social media link input field in the Chat page (frontend/src/pages/Chat.tsx) that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
+      "id": "REQ-120",
+      "text": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
         ],
         "quotes": [
-          "send social media links"
+          "ERROR IS THERE"
         ]
       },
       "acceptanceCriteria": [
-        "Input field accepts text URLs",
-        "Basic validation checks for valid URL format (http/https)",
-        "A 'Send Link' button sends the URL as a socialMediaLink message",
-        "Input clears after successful send"
+        "All mutation and query hooks correctly reference existing backend methods",
+        "No undefined method calls or incorrect parameter passing",
+        "Error boundaries handle failed queries gracefully",
+        "Query invalidation patterns are correct"
       ]
     },
     {
-      "id": "REQ-78",
-      "text": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
+      "id": "REQ-121",
+      "text": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-latest"
+        ],
+        "quotes": [
+          "ERROR IS THERE"
         ]
       },
       "acceptanceCriteria": [
-        "Grocery list messages display with a distinct visual style (e.g., card or bordered section)",
-        "Each grocery item appears as a list item with checkbox or bullet point",
-        "The message shows the sender and timestamp like regular messages"
+        "No circular import dependencies exist",
+        "All page components are imported correctly",
+        "Router configuration has valid paths and elements",
+        "AuthProvider and QueryClientProvider are properly configured"
       ]
     },
     {
-      "id": "REQ-79",
-      "text": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
-      "target": "frontend",
+      "id": "REQ-122",
+      "text": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-latest"
+        ],
+        "quotes": [
+          "RECONSTRUCT"
         ]
       },
       "acceptanceCriteria": [
-        "Social media link messages display with a distinct visual style (e.g., card with link icon)",
-        "URL is rendered as a clickable link with target='_blank' and rel='noopener noreferrer'",
-        "The message shows the sender and timestamp like regular messages",
-        "Link preview card includes visual indication that it's a link (icon, underline, or distinct styling)"
-      ]
-    },
-    {
-      "id": "REQ-80",
-      "text": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ]
-      },
-      "acceptanceCriteria": [
-        "UI provides clear options to select message type (text, grocery list, social media link)",
-        "Selecting a message type shows the appropriate input interface",
-        "The selected message type is visually indicated",
-        "Users can easily switch between message types"
+        "Backend canister deploys successfully",
+        "Frontend builds and deploys without errors",
+        "Application is accessible at the deployment URL",
+        "All existing features remain functional after deployment",
+        "No console errors appear on initial page load"
       ]
     }
   ],
   "constraints": [
-    "Do not change the existing Message type in a way that breaks existing text message functionality",
-    "Maintain compatibility with the single-actor backend architecture in backend/main.mo"
+    "Do not modify the single-actor backend architecture",
+    "Preserve all existing features and functionality during error fixes",
+    "Do not edit read-only frontend paths: useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, main.tsx, and components/ui directory"
   ],
   "nonGoals": [
-    "Implementing rich link previews with thumbnails or metadata scraping from external URLs",
-    "Adding grocery item autocomplete or suggestions",
-    "Enabling users to check off or mark grocery items as purchased",
-    "Supporting other message types beyond text, grocery lists, and social media links"
+    "Adding new features beyond error fixes",
+    "Refactoring working code that is not causing errors",
+    "Changing the UI design or styling",
+    "Modifying the authentication flow"
   ],
   "imageRequirements": {
     "required": [],

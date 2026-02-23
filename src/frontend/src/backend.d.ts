@@ -38,7 +38,8 @@ export interface Message {
     messageType: MessageType;
     groceryItems?: Array<string>;
     timestamp: bigint;
-    receiver: Principal;
+    chatType: ChatType;
+    recipientId?: Principal;
 }
 export interface ExpenseEntry {
     timestamp: bigint;
@@ -60,6 +61,10 @@ export interface UserProfile {
     parents: Array<FamilyMember>;
     location?: Location;
     avatar?: ExternalBlob;
+}
+export enum ChatType {
+    privateChat = "privateChat",
+    group = "group"
 }
 export enum ExpenseCategory {
     other = "other",
@@ -87,6 +92,7 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createFamilyInvitationToken(child: Principal, validationTimeHours: bigint): Promise<string>;
     createProfile(displayName: string, role: Role): Promise<void>;
+    deleteAccount(): Promise<void>;
     getActiveFamilyInvitations(): Promise<Array<FamilyInvitation>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -97,7 +103,7 @@ export interface backendInterface {
     removeChild(childPrincipal: Principal): Promise<void>;
     removeParent(parentPrincipal: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    sendMessage(receiver: Principal, text: string, messageType: MessageType, groceryItems: Array<string> | null, socialMediaUrl: string | null): Promise<void>;
+    sendMessage(text: string, messageType: MessageType, groceryItems: Array<string> | null, socialMediaUrl: string | null, chatType: ChatType, recipientId: Principal | null): Promise<void>;
     updateUserProfile(profile: UserProfile): Promise<void>;
     validateFamilyInvitationToken(token: string, child: Principal): Promise<Principal>;
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 27,
+  "projectStateVersion": 43,
   "summary": "Family communication app with AI-powered question paper analysis, sentiment-based happiness meter, problem-solving tracking, family guidance with professional tone, permission management for children, fight/conflict resolution tracking, and weekly expense tracking with AI-powered analysis and recommendations",
   "architectural_notes": [
     "App requires real-time updates for location sharing and messaging",
@@ -16,9 +16,11 @@
   ],
   "known_issues": [
     "Permission widget and parent/child role selection not visible or accessible in current deployment",
-    "Role selection modal (parent/child options) not displaying on login in Version 6"
+    "Role selection modal (parent/child options) not displaying on login in Version 6",
+    "Home page/dashboard is empty or missing previously mentioned features in Version 18",
+    "Build/deployment errors are occurring in Draft Version 20"
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "generatedImages": [
     {
       "filename": "Generated Image February 23, 2026 - 12:21PM.png",
@@ -481,6 +483,294 @@
         "REQ-80"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-implement-a-moveable-chat-widget-that-can-be-dragged-horizontally-side-to-side-along-the-bottom-of-the-screen-remaining-accessible-across-all-pages",
+      "title": "Implement a moveable chat widget that can be dragged horizontally (side to side) along the bottom of the screen, remaining accessible across all pages",
+      "reqIds": [
+        "REQ-81"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-private-one-to-one-chat-functionality-allowing-family-members-to-send-direct-messages-to-individual-family-members-separate-from-the-group-chat",
+      "title": "Implement private one-to-one chat functionality allowing family members to send direct messages to individual family members, separate from the group chat",
+      "reqIds": [
+        "REQ-82"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-group-chat-functionality-where-all-family-members-can-communicate-together-in-a-shared-conversation-space",
+      "title": "Implement group chat functionality where all family members can communicate together in a shared conversation space",
+      "reqIds": [
+        "REQ-83"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-chat-page-ui-to-include-a-chat-type-selector-that-allows-users-to-switch-between-private-one-to-one-chats-and-the-group-chat-for-all-family-members",
+      "title": "Update the Chat page UI to include a chat type selector that allows users to switch between private one-to-one chats and the group chat for all family members",
+      "reqIds": [
+        "REQ-84"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-convert-the-web-application-into-a-progressive-web-app-pwa-format-with-offline-capability-installability-and-native-app-like-experience-on-mobile-and-desktop-devices",
+      "title": "Convert the web application into a progressive web app (PWA) format with offline capability, installability, and native app-like experience on mobile and desktop devices",
+      "reqIds": [
+        "REQ-86"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-usegetmessages-query-hook-in-frontend-src-hooks-usequeries-ts-to-support-fetching-messages-by-chat-type-private-or-group-and-recipient-id-for-private-conversations",
+      "title": "Update the useGetMessages query hook in frontend/src/hooks/useQueries.ts to support fetching messages by chat type (private or group) and recipient ID for private conversations",
+      "reqIds": [
+        "REQ-87"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-usesendmessage-mutation-hook-in-frontend-src-hooks-usequeries-ts-to-include-chattype-and-recipientid-parameters-when-sending-private-or-group-messages",
+      "title": "Update the useSendMessage mutation hook in frontend/src/hooks/useQueries.ts to include chatType and recipientId parameters when sending private or group messages",
+      "reqIds": [
+        "REQ-88"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-settings-page-to-display-parent-names-without-principal-ids-for-users-with-child-role-when-parents-are-connected-to-the-family",
+      "title": "Update the Settings page to display parent names (without Principal IDs) for users with 'child' role when parents are connected to the family",
+      "reqIds": [
+        "REQ-89"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-increase-the-family-member-capacity-to-support-4-to-5-total-members-joining-and-connecting-through-the-invitation-system",
+      "title": "Increase the family member capacity to support 4 to 5 total members joining and connecting through the invitation system",
+      "reqIds": [
+        "REQ-90"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-settings-page-family-management-ui-to-conditionally-hide-principal-ids-in-the-parents-section-when-the-authenticated-user-has-child-role",
+      "title": "Update the Settings page family management UI to conditionally hide Principal IDs in the parents section when the authenticated user has 'child' role",
+      "reqIds": [
+        "REQ-92"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-the-profilesetupmodal-role-selection-modal-displays-correctly-on-first-login-when-user-has-no-role-set-in-their-profile",
+      "title": "Verify that the ProfileSetupModal role selection modal displays correctly on first login when user has no role set in their profile",
+      "reqIds": [
+        "REQ-94"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-role-based-widgets-render-correctly-on-the-dashboard-page-for-both-parent-and-child-users-after-role-selection",
+      "title": "Verify that role-based widgets render correctly on the Dashboard page for both parent and child users after role selection",
+      "reqIds": [
+        "REQ-95"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-test-and-verify-the-invitation-system-allows-new-family-members-to-join-successfully-via-url-parameters-containing-invitation-tokens",
+      "title": "Test and verify the invitation system allows new family members to join successfully via URL parameters containing invitation tokens",
+      "reqIds": [
+        "REQ-96"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-authenticated-user-s-principal-id-display-from-the-top-of-the-settings-page-frontend-src-pages-settings-tsx-leaving-only-the-family-management-sections-visible",
+      "title": "Remove the authenticated user's Principal ID display from the top of the Settings page (frontend/src/pages/Settings.tsx), leaving only the family management sections visible",
+      "reqIds": [
+        "REQ-97"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-all-principal-id-displays-from-the-parents-section-in-the-settings-page-for-all-users-showing-only-parent-names-in-the-family-management-interface",
+      "title": "Remove all Principal ID displays from the Parents section in the Settings page for all users, showing only parent names in the family management interface",
+      "reqIds": [
+        "REQ-98"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-all-principal-id-displays-from-the-children-section-in-the-settings-page-showing-only-child-names-in-the-family-management-interface",
+      "title": "Remove all Principal ID displays from the Children section in the Settings page, showing only child names in the family management interface",
+      "reqIds": [
+        "REQ-99"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-streamline-the-internet-identity-login-flow-in-the-authentication-system-to-reduce-friction-ensuring-users-can-authenticate-in-the-minimum-number-of-steps-without-additional-prompts-or-delays",
+      "title": "Streamline the Internet Identity login flow in the authentication system to reduce friction, ensuring users can authenticate in the minimum number of steps without additional prompts or delays",
+      "reqIds": [
+        "REQ-100"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-simplify-the-family-joining-workflow-by-auto-detecting-invitation-tokens-from-url-parameters-and-automatically-processing-them-without-requiring-manual-input-or-additional-confirmation-steps",
+      "title": "Simplify the family joining workflow by auto-detecting invitation tokens from URL parameters and automatically processing them without requiring manual input or additional confirmation steps",
+      "reqIds": [
+        "REQ-101"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-optimize-the-profilesetupmodal-role-selection-interface-to-appear-seamlessly-after-first-login-with-clear-visual-affordances-and-immediate-role-saving-without-requiring-page-refresh",
+      "title": "Optimize the ProfileSetupModal role selection interface to appear seamlessly after first login, with clear visual affordances and immediate role saving without requiring page refresh",
+      "reqIds": [
+        "REQ-102"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-shareapp-component-to-make-invitation-link-sharing-more-prominent-and-user-friendly-with-one-click-copy-functionality-and-clear-instructions-for-inviting-family-members",
+      "title": "Enhance the ShareApp component to make invitation link sharing more prominent and user-friendly, with one-click copy functionality and clear instructions for inviting family members",
+      "reqIds": [
+        "REQ-103"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-visual-onboarding-indicators-or-tooltips-on-first-login-to-guide-new-users-through-the-initial-setup-steps-role-selection-family-joining-without-overwhelming-them",
+      "title": "Add visual onboarding indicators or tooltips on first login to guide new users through the initial setup steps (role selection, family joining) without overwhelming them",
+      "reqIds": [
+        "REQ-104"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-happiness-meter-widget-on-the-dashboard-page-showing-the-family-happiness-score-with-color-coded-progress-bar",
+      "title": "Display the happiness meter widget on the Dashboard page showing the family happiness score with color-coded progress bar",
+      "reqIds": [
+        "REQ-105"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-problems-solved-widget-on-the-dashboard-page-showing-the-total-count-of-resolved-educational-problems",
+      "title": "Display the problems solved widget on the Dashboard page showing the total count of resolved educational problems",
+      "reqIds": [
+        "REQ-106"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-expense-chart-and-expense-analysis-components-on-the-dashboard-page-for-both-parent-and-child-roles",
+      "title": "Display the expense chart and expense analysis components on the Dashboard page for both parent and child roles",
+      "reqIds": [
+        "REQ-107"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-permission-request-widget-for-users-with-child-role-on-the-dashboard-page",
+      "title": "Display the permission request widget for users with child role on the Dashboard page",
+      "reqIds": [
+        "REQ-108"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-permission-approval-interface-for-users-with-parent-role-on-the-dashboard-page",
+      "title": "Display the permission approval interface for users with parent role on the Dashboard page",
+      "reqIds": [
+        "REQ-109"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-fights-created-and-fights-solved-counter-widgets-for-users-with-parent-role-on-the-dashboard-page",
+      "title": "Display the fights created and fights solved counter widgets for users with parent role on the Dashboard page",
+      "reqIds": [
+        "REQ-110"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-expense-input-component-for-users-with-parent-role-on-the-dashboard-page",
+      "title": "Display the expense input component for users with parent role on the Dashboard page",
+      "reqIds": [
+        "REQ-111"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-the-dashboard-page-component-at-frontend-src-pages-dashboard-tsx-correctly-fetches-and-displays-all-widgets-based-on-user-authentication-and-role",
+      "title": "Verify the Dashboard page component at frontend/src/pages/Dashboard.tsx correctly fetches and displays all widgets based on user authentication and role",
+      "reqIds": [
+        "REQ-112"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-forget-account-or-delete-account-option-in-the-settings-page-that-allows-users-to-permanently-delete-their-account-and-all-associated-data",
+      "title": "Create a 'Forget Account' or 'Delete Account' option in the Settings page that allows users to permanently delete their account and all associated data",
+      "reqIds": [
+        "REQ-113"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-usedeleteaccount-react-query-mutation-hook-in-usequeries-ts-that-calls-the-backend-deleteuserprofile-method-and-handles-logout-after-successful-deletion",
+      "title": "Create a useDeleteAccount React Query mutation hook in useQueries.ts that calls the backend deleteUserProfile method and handles logout after successful deletion",
+      "reqIds": [
+        "REQ-115"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-and-identify-the-specific-build-or-deployment-error-that-is-preventing-draft-version-20-from-deploying-successfully",
+      "title": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
+      "reqIds": [
+        "REQ-117"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-any-typescript-or-react-compilation-errors-in-frontend-source-files-that-are-preventing-successful-frontend-build",
+      "title": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
+      "reqIds": [
+        "REQ-119"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-all-react-query-hooks-in-usequeries-ts-have-correct-actor-method-calls-and-proper-error-handling",
+      "title": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
+      "reqIds": [
+        "REQ-120"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-component-imports-and-routing-configuration-in-app-tsx-and-main-tsx-are-correctly-structured-without-circular-dependencies",
+      "title": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
+      "reqIds": [
+        "REQ-121"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-run-the-complete-build-and-deployment-process-end-to-end-to-verify-all-errors-are-resolved-and-the-application-deploys-successfully",
+      "title": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
+      "reqIds": [
+        "REQ-122"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -897,22 +1187,6 @@
       "status": "pending"
     },
     {
-      "id": "AR-78",
-      "summary": "Add grocery items sharing feature in chat to send list of grocery items to family members",
-      "reqIds": [
-        "AR-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-79",
-      "summary": "Add social media link sharing feature in chat to send and preview social media links",
-      "reqIds": [
-        "AR-3"
-      ],
-      "status": "pending"
-    },
-    {
       "id": "AR-80",
       "summary": "Update the Message data type in backend/main.mo to support a new messageType field with variants for text, groceryList, and socialMediaLink",
       "reqIds": [
@@ -941,6 +1215,115 @@
       "summary": "Update the backend sendMessage method in main.mo to accept and validate grocery item arrays and social media URLs based on the messageType parameter",
       "reqIds": [
         "REQ-74"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-84",
+      "summary": "Make the chat widget moveable side to side at the bottom of the screen",
+      "reqIds": [
+        "AR-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-85",
+      "summary": "Convert the application into a mobile/desktop app format",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-86",
+      "summary": "Implement private one-to-one chat functionality between individual family members",
+      "reqIds": [
+        "AR-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-87",
+      "summary": "Implement group chat functionality for all family members to communicate together",
+      "reqIds": [
+        "AR-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-92",
+      "summary": "Update the Message data model in backend/main.mo to include a chatType field (private or group) and a recipientId field for private messages to support both one-to-one and group messaging",
+      "reqIds": [
+        "REQ-85"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-93",
+      "summary": "Display parent names (without Principal IDs) in Settings page for child accounts when parents are joined",
+      "reqIds": [
+        "AR-29",
+        "AR-51",
+        "AR-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-94",
+      "summary": "Support 4 to 5 family members joining the application using the same invitation/connection system",
+      "reqIds": [
+        "AR-69",
+        "AR-73"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-97",
+      "summary": "Update the UserProfile data model in backend/main.mo to enforce a maximum family size of 4-5 total members across parents and children combined",
+      "reqIds": [
+        "REQ-91"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-98",
+      "summary": "Diagnose and fix the deployment error that prevented successful application deployment, ensuring the build process completes without errors",
+      "reqIds": [
+        "REQ-93"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-99",
+      "summary": "Simplify the login and joining process to make it easier for new users to authenticate and connect with family members",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-100",
+      "summary": "Add a 'Forget Account' or account deletion option in the application",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-102",
+      "summary": "Create a backend method in main.mo to handle account deletion, removing the user's profile, all associated family connections, messages, expenses, permissions, and study materials",
+      "reqIds": [
+        "REQ-114"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-104",
+      "summary": "Add the home page information and features mentioned in previous conversations to the Dashboard page, ensuring all previously discussed widgets and functionality are visible and functional",
+      "reqIds": [
+        "REQ-116"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-106",
+      "summary": "Fix any Motoko compilation errors in backend/main.mo that are preventing successful backend build",
+      "reqIds": [
+        "REQ-118"
       ],
       "status": "pending"
     }

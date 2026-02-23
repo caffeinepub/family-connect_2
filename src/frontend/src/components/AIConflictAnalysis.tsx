@@ -40,7 +40,10 @@ export default function AIConflictAnalysis() {
     
     // Call backend for logging
     try {
-      await provideGuidance.mutateAsync('Family conflict analysis performed');
+      await provideGuidance.mutateAsync({ 
+        doubt: 'Family conflict analysis performed', 
+        context: 'AI conflict detection and remedy suggestion' 
+      });
     } catch (error) {
       console.error('Failed to log AI guidance:', error);
     }
@@ -91,7 +94,7 @@ export default function AIConflictAnalysis() {
                     className="p-4 border border-warm-200 rounded-lg space-y-3 bg-white dark:bg-warm-950"
                   >
                     <div className="flex items-start gap-2">
-                      <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-sm font-medium text-warm-900 dark:text-warm-100 mb-2">
                           {conflict.description}
@@ -99,7 +102,7 @@ export default function AIConflictAnalysis() {
                       </div>
                     </div>
                     <div className="flex items-start gap-2 pl-7">
-                      <Lightbulb className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <Lightbulb className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-sm text-muted-foreground">
                           {conflict.remedy}

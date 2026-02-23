@@ -10,6 +10,8 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type ChatType = { 'privateChat' : null } |
+  { 'group' : null };
 export type ExpenseCategory = { 'other' : null } |
   { 'fees' : null } |
   { 'groceries' : null };
@@ -46,7 +48,8 @@ export interface Message {
   'messageType' : MessageType,
   'groceryItems' : [] | [Array<string>],
   'timestamp' : bigint,
-  'receiver' : Principal,
+  'chatType' : ChatType,
+  'recipientId' : [] | [Principal],
 }
 export type MessageType = { 'text' : null } |
   { 'socialMediaLink' : null } |
@@ -100,6 +103,7 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createFamilyInvitationToken' : ActorMethod<[Principal, bigint], string>,
   'createProfile' : ActorMethod<[string, Role], undefined>,
+  'deleteAccount' : ActorMethod<[], undefined>,
   'getActiveFamilyInvitations' : ActorMethod<[], Array<FamilyInvitation>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
@@ -111,7 +115,14 @@ export interface _SERVICE {
   'removeParent' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'sendMessage' : ActorMethod<
-    [Principal, string, MessageType, [] | [Array<string>], [] | [string]],
+    [
+      string,
+      MessageType,
+      [] | [Array<string>],
+      [] | [string],
+      ChatType,
+      [] | [Principal],
+    ],
     undefined
   >,
   'updateUserProfile' : ActorMethod<[UserProfile], undefined>,

@@ -1,132 +1,132 @@
-import { useState, useEffect } from 'react';
-import { useGetUpdates, useCreateUpdate, useGetCallerUserProfile, useGetAllProfiles } from '../hooks/useQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Textarea } from '../components/ui/textarea';
-import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { Loader2, Send } from 'lucide-react';
-import { Principal } from '@dfinity/principal';
+import { useGetCallerUserProfile } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useOnboarding } from '../hooks/useOnboarding';
+import { useEffect } from 'react';
 import HappinessMeter from '../components/HappinessMeter';
 import ProblemsSolvedWidget from '../components/ProblemsSolvedWidget';
 import PermissionRequestWidget from '../components/PermissionRequestWidget';
 import PermissionApprovalInterface from '../components/PermissionApprovalInterface';
-import FightsSolvedWidget from '../components/FightsSolvedWidget';
 import FightsCreatedWidget from '../components/FightsCreatedWidget';
+import FightsSolvedWidget from '../components/FightsSolvedWidget';
 import ExpenseChart from '../components/ExpenseChart';
 import ExpenseInput from '../components/ExpenseInput';
 import ExpenseAnalysis from '../components/ExpenseAnalysis';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Loader2, Heart, TrendingUp, Users, UserPlus } from 'lucide-react';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { Role } from '../backend';
 
 export default function Dashboard() {
-  const [updateText, setUpdateText] = useState('');
-  const { data: updates, isLoading: updatesLoading } = useGetUpdates();
-  const { data: userProfile, isLoading: profileLoading, isFetched: profileFetched } = useGetCallerUserProfile();
-  const { data: allProfiles } = useGetAllProfiles();
-  const createUpdate = useCreateUpdate();
+  const { identity } = useInternetIdentity();
+  const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
+  const { markStepComplete, shouldShowGuidance } = useOnboarding();
 
+  const isAuthenticated = !!identity;
   const isParent = userProfile?.role === Role.parent;
   const isChild = userProfile?.role === Role.child;
+  
+  const hasFamily = (userProfile?.parents.length ?? 0) > 0 || (userProfile?.children.length ?? 0) > 0;
+  const showParentGuidance = isParent && !hasFamily && shouldShowGuidance('shareButtonHighlight');
+  const showChildGuidance = isChild && !hasFamily && shouldShowGuidance('firstFamilyConnection');
 
-  // Debug logging for role-based widget visibility
+  // Mark first dashboard visit as complete
   useEffect(() => {
-    console.log('🏠 [Dashboard] User Profile State:', {
-      userProfile,
-      profileLoading,
-      profileFetched,
-      role: userProfile?.role,
-      roleType: typeof userProfile?.role,
-      roleValue: userProfile?.role,
-      isParent,
-      isChild,
-      roleComparison: {
-        'role === Role.parent': userProfile?.role === Role.parent,
-        'role === Role.child': userProfile?.role === Role.child,
-        'Role.parent value': Role.parent,
-        'Role.child value': Role.child,
-        'role === undefined': userProfile?.role === undefined,
-        'role === null': userProfile?.role === null,
-      },
-    });
-
-    if (userProfile?.role === undefined || userProfile?.role === null) {
-      console.warn('⚠️ [Dashboard] User role is undefined or null!');
+    if (isAuthenticated && userProfile) {
+      markStepComplete('firstDashboardVisit');
     }
+  }, [isAuthenticated, userProfile, markStepComplete]);
 
-    console.log('🎯 [Dashboard - Widget Visibility]:', {
-      'Should show PermissionRequestWidget (child)': isChild,
-      'Should show PermissionApprovalInterface (parent)': isParent,
-    });
-  }, [userProfile, profileLoading, profileFetched, isParent, isChild]);
+  // Auto-highlight share button for parents without family
+  useEffect(() => {
+    if (showParentGuidance) {
+      // The highlight is handled in Layout.tsx
+      const timer = setTimeout(() => {
+        markStepComplete('shareButtonHighlight');
+      }, 10000); // Auto-dismiss after 10 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [showParentGuidance, markStepComplete]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!updateText.trim()) return;
-
-    await createUpdate.mutateAsync(updateText);
-    setUpdateText('');
-  };
-
-  const getProfileName = (principal: Principal): string => {
-    const profile = allProfiles?.find(
-      (p) => p.displayName && allProfiles.indexOf(p) !== -1
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert>
+          <AlertDescription>
+            Please log in to view your family dashboard.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
-    return profile?.displayName || 'Family Member';
-  };
+  }
 
-  const formatTimestamp = (timestamp: bigint): string => {
-    const date = new Date(Number(timestamp) / 1000000);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+  if (profileLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-12 w-12 animate-spin text-warm-500" />
+      </div>
+    );
+  }
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
+  if (!userProfile) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert>
+          <AlertDescription>
+            Setting up your profile...
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="relative rounded-2xl overflow-hidden shadow-lg">
-        <img
-          src="/assets/generated/dashboard-interface.dim_1200x800.png"
-          alt="FamilyConnect Dashboard"
-          className="w-full h-auto"
-        />
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* Welcome Section */}
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold text-warm-900 dark:text-warm-100">
+          Welcome back, {userProfile.displayName}! 👋
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Your family dashboard
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Onboarding Guidance for Parents */}
+      {showParentGuidance && (
+        <Alert className="bg-warm-50 dark:bg-warm-900/30 border-warm-300 dark:border-warm-700">
+          <UserPlus className="h-5 w-5 text-warm-600" />
+          <AlertDescription className="text-warm-900 dark:text-warm-100">
+            <strong>👋 Welcome, Parent!</strong> Click the <strong>"Invite Family"</strong> button in the header to share FamilyConnect with your children.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Onboarding Guidance for Children */}
+      {showChildGuidance && (
+        <Alert className="bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700">
+          <Users className="h-5 w-5 text-blue-600" />
+          <AlertDescription className="text-blue-900 dark:text-blue-100">
+            <strong>👋 Welcome!</strong> Ask your parent to share their invitation link with you, or connect with them in <strong>Settings</strong> to join your family.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Top Metrics Row - Visible to All */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <HappinessMeter />
         <ProblemsSolvedWidget />
       </div>
 
-      {isParent && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FightsSolvedWidget />
-            <FightsCreatedWidget />
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            <PermissionApprovalInterface />
-          </div>
-        </>
-      )}
-
-      {isChild && (
-        <div className="grid grid-cols-1 gap-4">
-          <PermissionRequestWidget />
+      {/* Expense Tracking Section - Visible to All */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-warm-600" />
+          <h2 className="text-2xl font-semibold text-warm-900 dark:text-warm-100">
+            Family Expenses
+          </h2>
         </div>
-      )}
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-warm-900 dark:text-warm-100">
-          Weekly Expense Tracking
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ExpenseChart />
           {isParent && <ExpenseInput />}
         </div>
@@ -134,84 +134,65 @@ export default function Dashboard() {
         <ExpenseAnalysis />
       </div>
 
-      <Card className="border-warm-200 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-warm-900 dark:text-warm-100">Share an Update</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Textarea
-              placeholder="What's happening with the family?"
-              value={updateText}
-              onChange={(e) => setUpdateText(e.target.value)}
-              className="min-h-[100px] resize-none border-warm-200"
-            />
-            <Button type="submit" disabled={!updateText.trim() || createUpdate.isPending}>
-              {createUpdate.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Posting...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Post Update
-                </>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Role-Based Widgets */}
+      {isChild && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-semibold text-warm-900 dark:text-warm-100">
+            Child Dashboard
+          </h2>
+          <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <AlertDescription className="text-blue-900 dark:text-blue-100">
+              <strong>Note:</strong> Permission request and approval features are coming soon! 
+              The backend implementation is in progress.
+            </AlertDescription>
+          </Alert>
+          <PermissionRequestWidget />
+        </div>
+      )}
 
-      <Card className="border-warm-200 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-warm-900 dark:text-warm-100">Family Updates</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {updatesLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-warm-500" />
-            </div>
-          ) : updates && updates.length > 0 ? (
-            <div className="space-y-4">
-              {updates.map((update: any, index: number) => {
-                const authorName = getProfileName(update.author);
-                const initials = authorName
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase()
-                  .slice(0, 2);
+      {isParent && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-semibold text-warm-900 dark:text-warm-100">
+            Parent Dashboard
+          </h2>
+          
+          <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+            <AlertDescription className="text-blue-900 dark:text-blue-100">
+              <strong>Note:</strong> Permission approval and fight tracking features are coming soon! 
+              The backend implementation is in progress.
+            </AlertDescription>
+          </Alert>
 
-                return (
-                  <div key={index} className="flex gap-3 p-4 bg-warm-50 dark:bg-warm-900 rounded-lg">
-                    <Avatar className="h-10 w-10 border-2 border-warm-300">
-                      <AvatarFallback className="bg-warm-200 text-warm-800 font-semibold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-warm-900 dark:text-warm-100">
-                          {authorName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimestamp(update.timestamp)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-foreground whitespace-pre-wrap">{update.text}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">
-              No updates yet. Be the first to share something!
+          {/* Permission Approval */}
+          <PermissionApprovalInterface />
+
+          {/* Fight Tracking */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FightsSolvedWidget />
+            <FightsCreatedWidget />
+          </div>
+        </div>
+      )}
+
+      {/* Family Updates Feed */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Heart className="h-6 w-6 text-warm-600" />
+          <h2 className="text-2xl font-semibold text-warm-900 dark:text-warm-100">
+            Family Updates
+          </h2>
+        </div>
+        <Card className="border-warm-200">
+          <CardHeader>
+            <CardTitle className="text-lg">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No recent updates. Start sharing with your family!
             </p>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

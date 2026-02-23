@@ -1,0 +1,19 @@
+{
+  "name": "FamilyConnect",
+  "short_name": "FamilyConnect",
+  "description": "Stay Connected with Your Loved Ones",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/assets/generated/app-logo.dim_200x200.png",
+      "sizes": "200x200",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,105 +1,191 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add grocery items and social media link sharing to chat",
+  "title": "Diagnose and fix deployment error preventing successful build",
   "requirements": [
     {
-      "id": "REQ-75",
-      "summary": "Update the useSendMessage mutation hook to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
+      "id": "REQ-117",
+      "summary": "Investigate and identify the specific build or deployment error preventing Draft Version 20 from deploying successfully",
       "acceptanceCriteria": [
-        "Hook accepts optional groceryItems and socialMediaUrl in mutation variables",
-        "Hook properly serializes grocery items array and social media URL for backend",
-        "Mutation invalidates message queries after successful send"
+        "Build logs are reviewed to identify the exact error message and stack trace",
+        "The root cause of the deployment failure is identified (backend compilation error, frontend build error, or deployment configuration issue)",
+        "Error is documented with specific file paths and line numbers if applicable"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Review and fix any TypeScript compilation errors, import issues, or React component syntax problems that may be causing build failures. Verify all component imports are correct and routing configuration is valid."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review all React Query hooks to ensure they correctly reference backend methods from the backend interface and have proper error handling. Verify no undefined method calls exist."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Review provider setup, import statements, and ensure no circular dependencies or module resolution issues exist that could prevent successful build."
+        }
+      ]
+    },
+    {
+      "id": "REQ-119",
+      "summary": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
+      "acceptanceCriteria": [
+        "All TypeScript type errors are resolved",
+        "Import statements and module paths are correct",
+        "React component syntax errors are fixed",
+        "Frontend builds successfully without errors",
+        "All existing components render without runtime errors"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Fix any TypeScript type errors, incorrect prop passing, or missing import statements. Ensure all hooks and components are properly typed and imported."
+        },
+        {
+          "path": "frontend/src/pages/Chat.tsx",
+          "operation": "modify",
+          "description": "Resolve TypeScript compilation errors related to message types, chat functionality, and component props. Verify all enums and types match the backend interface."
+        },
+        {
+          "path": "frontend/src/pages/EducationalHub.tsx",
+          "operation": "modify",
+          "description": "Fix type mismatches in file upload handling, ExternalBlob usage, and tab component integration. Ensure proper typing for all state variables and props."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Resolve type errors in profile updates, family member management, and account deletion flows. Ensure Principal types are correctly used throughout."
+        },
+        {
+          "path": "frontend/src/pages/LocationSharing.tsx",
+          "operation": "modify",
+          "description": "Fix type errors related to Location interface, geolocation API integration, and family member location display."
+        },
+        {
+          "path": "frontend/src/pages/MediaGallery.tsx",
+          "operation": "modify",
+          "description": "Resolve ExternalBlob type usage errors, file upload progress handling, and media item display TypeScript issues."
+        },
+        {
+          "path": "frontend/src/pages/Reminders.tsx",
+          "operation": "modify",
+          "description": "Fix any type errors in reminder creation, date handling, and status badge logic."
+        },
+        {
+          "path": "frontend/src/components/ChatWidget.tsx",
+          "operation": "modify",
+          "description": "Resolve TypeScript errors in drag functionality, message sending, and chat state management. Ensure proper typing for all event handlers."
+        },
+        {
+          "path": "frontend/src/components/ExpenseInput.tsx",
+          "operation": "modify",
+          "description": "Fix type errors in form handling, expense category enum usage, and mutation hook integration."
+        },
+        {
+          "path": "frontend/src/components/ExpenseChart.tsx",
+          "operation": "modify",
+          "description": "Resolve type mismatches in expense data visualization and chart rendering logic."
+        },
+        {
+          "path": "frontend/src/components/ExpenseAnalysis.tsx",
+          "operation": "modify",
+          "description": "Fix TypeScript errors in expense calculation logic and insight generation."
+        },
+        {
+          "path": "frontend/src/components/PermissionRequestWidget.tsx",
+          "operation": "modify",
+          "description": "Resolve type errors in permission request form handling and submission logic."
+        },
+        {
+          "path": "frontend/src/components/PermissionApprovalInterface.tsx",
+          "operation": "modify",
+          "description": "Fix type mismatches in permission approval/denial flow and request data handling."
+        },
+        {
+          "path": "frontend/src/components/ShareApp.tsx",
+          "operation": "modify",
+          "description": "Resolve TypeScript errors in invitation link generation and clipboard functionality."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Fix type errors in navigation, authentication integration, and responsive layout logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-120",
+      "summary": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
+      "acceptanceCriteria": [
+        "All mutation and query hooks correctly reference existing backend methods",
+        "No undefined method calls or incorrect parameter passing",
+        "Error boundaries handle failed queries gracefully",
+        "Query invalidation patterns are correct"
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Extend the useSendMessage mutation hook to accept messageType, groceryItems (array of strings), and socialMediaUrl (string) as optional parameters in the mutation variables. Update the mutation function to call actor.sendMessage with these new parameters, passing null for groceryItems/socialMediaUrl when not provided. Ensure the mutation continues to invalidate ['messages'] query key after successful send."
+          "description": "Review and correct all query and mutation hooks to ensure they call existing backend methods from the backend interface (frontend/src/backend.d.ts). Verify parameter types match backend signatures, add proper error handling for all queries and mutations, and ensure query invalidation occurs after successful mutations. Fix any undefined method references or type mismatches."
         }
       ]
     },
     {
-      "id": "REQ-76",
-      "summary": "Add a grocery list composer UI in the Chat page that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
+      "id": "REQ-121",
+      "summary": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
       "acceptanceCriteria": [
-        "Users can type grocery item names and add them to a temporary list",
-        "UI shows all items in the current grocery list with remove buttons",
-        "A 'Send Grocery List' button sends all items as a single groceryList message",
-        "The grocery list UI clears after successful send"
+        "No circular import dependencies exist",
+        "All page components are imported correctly",
+        "Router configuration has valid paths and elements",
+        "AuthProvider and QueryClientProvider are properly configured"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/Chat.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a grocery list composer section to the Chat page. Include local state to manage a temporary array of grocery items (strings). Add an input field for typing grocery item names with an 'Add Item' button that appends the item to the temporary list. Display all items in the list with individual remove buttons. Add a 'Send Grocery List' button that calls the useSendMessage mutation with messageType 'groceryList' and the groceryItems array, then clears the temporary list on success. Position this UI in the message composition area, visible when the grocery list message type is selected."
+          "description": "Verify all page component imports are correct and no circular dependencies exist. Ensure TanStack Router configuration has valid route paths and component elements. Confirm ProfileSetupModal and authentication flows are properly wired without import cycles."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Verify provider hierarchy (QueryClientProvider and AuthProvider) is correctly structured. Ensure no circular imports exist in the entry point and all necessary providers are properly configured."
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Review actor creation logic to ensure proper typing, error handling, and no circular dependency issues with other hooks or components."
+        },
+        {
+          "path": "frontend/src/utils/urlParams.ts",
+          "operation": "modify",
+          "description": "Fix any TypeScript errors in URL parameter extraction and ensure proper typing for hash-based routing utilities used throughout the app."
         }
       ]
     },
     {
-      "id": "REQ-77",
-      "summary": "Add a social media link input field in the Chat page that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
+      "id": "REQ-122",
+      "summary": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
       "acceptanceCriteria": [
-        "Input field accepts text URLs",
-        "Basic validation checks for valid URL format (http/https)",
-        "A 'Send Link' button sends the URL as a socialMediaLink message",
-        "Input clears after successful send"
+        "Backend canister deploys successfully",
+        "Frontend builds and deploys without errors",
+        "Application is accessible at the deployment URL",
+        "All existing features remain functional after deployment",
+        "No console errors appear on initial page load"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/Chat.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a social media link input section to the Chat page. Include an input field for entering URLs with local state management. Implement basic client-side validation to check that the URL starts with 'http://' or 'https://'. Add a 'Send Link' button that calls the useSendMessage mutation with messageType 'socialMediaLink' and the socialMediaUrl parameter when validation passes. Clear the input field after successful send. Display validation error messages when the URL format is invalid. Position this UI in the message composition area, visible when the social media link message type is selected."
-        }
-      ]
-    },
-    {
-      "id": "REQ-78",
-      "summary": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
-      "acceptanceCriteria": [
-        "Grocery list messages display with a distinct visual style (e.g., card or bordered section)",
-        "Each grocery item appears as a list item with checkbox or bullet point",
-        "The message shows the sender and timestamp like regular messages"
-      ],
-      "file_operations": [
+          "description": "After all fixes are applied, verify the App component renders correctly with all routes accessible, authentication flows working, and no console errors on mount."
+        },
         {
-          "path": "frontend/src/pages/Chat.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update the message rendering logic in Chat.tsx to conditionally render grocery list messages. When message.messageType is 'groceryList', display the message with a distinct card or bordered visual style. Map over message.groceryItems array and render each item as a list entry with a checkbox or bullet point. Include the sender name (fetched from user profile) and timestamp in the message header, consistent with regular text messages. Use Tailwind CSS classes to style the grocery list message differently from text messages (e.g., bg-green-50 border-green-200 for light mode)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-79",
-      "summary": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
-      "acceptanceCriteria": [
-        "Social media link messages display with a distinct visual style (e.g., card with link icon)",
-        "URL is rendered as a clickable link with target='_blank' and rel='noopener noreferrer'",
-        "The message shows the sender and timestamp like regular messages",
-        "Link preview card includes visual indication that it's a link (icon, underline, or distinct styling)"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/Chat.tsx",
-          "operation": "modify",
-          "description": "Update the message rendering logic in Chat.tsx to conditionally render social media link messages. When message.messageType is 'socialMediaLink', display the message as a card with distinct styling (e.g., bg-blue-50 border-blue-200). Render message.socialMediaUrl as a clickable hyperlink with target='_blank' and rel='noopener noreferrer' for security. Include a link icon (from lucide-react or similar) next to the URL. Include the sender name and timestamp in the message header, consistent with regular messages. Apply visual indicators that it's a clickable link (underline, icon, hover effects)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-80",
-      "summary": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
-      "acceptanceCriteria": [
-        "UI provides clear options to select message type (text, grocery list, social media link)",
-        "Selecting a message type shows the appropriate input interface",
-        "The selected message type is visually indicated",
-        "Users can easily switch between message types"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/Chat.tsx",
-          "operation": "modify",
-          "description": "Add a message type selector UI component to the Chat page above the message composition area. Implement three toggle buttons or radio buttons labeled 'Text Message', 'Grocery List', and 'Social Media Link'. Use local state to track the currently selected message type. Apply distinct styling to visually indicate the active selection (e.g., bg-primary text-white for selected, bg-gray-100 for unselected). When a message type is selected, conditionally render the appropriate input interface: the existing text input for 'Text Message', the grocery list composer for 'Grocery List', and the URL input for 'Social Media Link'. Ensure smooth transitions between message type selections."
+          "description": "Verify all query hooks execute successfully without errors after deployment, properly fetching data from the backend and handling edge cases gracefully."
         }
       ]
     }

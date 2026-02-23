@@ -1,46 +1,67 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-23T10:31:11.489Z",
+  "generatedAt": "2026-02-23T13:30:24.476Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 10,
-    "implemented": 6,
+    "total": 6,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-71",
-        "summary": "Update the Message data type in backend/main.mo to support a new messageType field with variants for text, groceryList, and socialMediaLink",
+        "id": "REQ-117",
+        "summary": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/main.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-118",
+        "summary": "Fix any Motoko compilation errors in backend/main.mo that are preventing successful backend build",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-72",
-        "summary": "Extend the Message data structure in backend/main.mo to include an optional groceryItems field that stores an array of grocery item strings when messageType is groceryList",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "id": "REQ-119",
+        "summary": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/pages/EducationalHub.tsx",
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/pages/LocationSharing.tsx",
+          "frontend/src/pages/MediaGallery.tsx",
+          "frontend/src/pages/Reminders.tsx",
+          "frontend/src/components/ChatWidget.tsx",
+          "frontend/src/components/ExpenseInput.tsx",
+          "frontend/src/components/ExpenseChart.tsx",
+          "frontend/src/components/ExpenseAnalysis.tsx",
+          "frontend/src/components/PermissionRequestWidget.tsx",
+          "frontend/src/components/PermissionApprovalInterface.tsx",
+          "frontend/src/components/ShareApp.tsx",
+          "frontend/src/components/Layout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Chat.tsx",
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/ChatWidget.tsx",
+          "frontend/src/components/PermissionApprovalInterface.tsx"
+        ]
       },
       {
-        "id": "REQ-73",
-        "summary": "Extend the Message data structure in backend/main.mo to include an optional socialMediaUrl field that stores the URL string when messageType is socialMediaLink",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-74",
-        "summary": "Update the backend sendMessage method in main.mo to accept and validate grocery item arrays and social media URLs based on the messageType parameter",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-75",
-        "summary": "Update the useSendMessage mutation hook in frontend/src/hooks/useQueries.ts to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
+        "id": "REQ-120",
+        "summary": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/hooks/useQueries.ts"
@@ -50,75 +71,50 @@
         ]
       },
       {
-        "id": "REQ-76",
-        "summary": "Add a grocery list composer UI in the Chat page (frontend/src/pages/Chat.tsx) that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
+        "id": "REQ-121",
+        "summary": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Chat.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/main.tsx",
+          "frontend/src/hooks/useActor.ts",
+          "frontend/src/utils/urlParams.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Chat.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/utils/urlParams.ts"
         ]
       },
       {
-        "id": "REQ-77",
-        "summary": "Add a social media link input field in the Chat page (frontend/src/pages/Chat.tsx) that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
+        "id": "REQ-122",
+        "summary": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Chat.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Chat.tsx"
-        ]
-      },
-      {
-        "id": "REQ-78",
-        "summary": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/Chat.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/Chat.tsx"
-        ]
-      },
-      {
-        "id": "REQ-79",
-        "summary": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/Chat.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/Chat.tsx"
-        ]
-      },
-      {
-        "id": "REQ-80",
-        "summary": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/Chat.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/Chat.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/App.tsx",
+    "frontend/src/components/ChatWidget.tsx",
+    "frontend/src/components/FightsCreatedWidget.tsx",
+    "frontend/src/components/FightsSolvedWidget.tsx",
+    "frontend/src/components/PermissionApprovalInterface.tsx",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/Chat.tsx",
+    "frontend/src/pages/Settings.tsx",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

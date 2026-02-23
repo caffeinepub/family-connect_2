@@ -2,8 +2,52 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-usesendmessage-mutation-hook-in-frontend-src-hooks-usequeries-ts-to-support-sending-messages-with-messagetype-groceryitems-array-and-socialmediaurl-parameters",
-      "featureTitle": "Update the useSendMessage mutation hook in frontend/src/hooks/useQueries.ts to support sending messages with messageType, groceryItems array, and socialMediaUrl parameters",
+      "featureId": "feature-investigate-and-identify-the-specific-build-or-deployment-error-that-is-preventing-draft-version-20-from-deploying-successfully",
+      "featureTitle": "Investigate and identify the specific build or deployment error that is preventing Draft Version 20 from deploying successfully",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-117"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-any-typescript-or-react-compilation-errors-in-frontend-source-files-that-are-preventing-successful-frontend-build",
+      "featureTitle": "Fix any TypeScript or React compilation errors in frontend source files that are preventing successful frontend build",
+      "files": [
+        "frontend/src/components/ChatWidget.tsx",
+        "frontend/src/components/PermissionApprovalInterface.tsx",
+        "frontend/src/pages/Chat.tsx",
+        "frontend/src/pages/Settings.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-119"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-verify-that-all-react-query-hooks-in-usequeries-ts-have-correct-actor-method-calls-and-proper-error-handling",
+      "featureTitle": "Verify that all React Query hooks in useQueries.ts have correct actor method calls and proper error handling",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -17,15 +61,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-75"
+        "REQ-120"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-grocery-list-composer-ui-in-the-chat-page-frontend-src-pages-chat-tsx-that-allows-users-to-add-multiple-grocery-items-to-a-list-with-an-input-field-and-add-remove-buttons-then-send-the-complete-list-as-a-single-message",
-      "featureTitle": "Add a grocery list composer UI in the Chat page (frontend/src/pages/Chat.tsx) that allows users to add multiple grocery items to a list with an input field and add/remove buttons, then send the complete list as a single message",
+      "featureId": "feature-ensure-all-component-imports-and-routing-configuration-in-app-tsx-and-main-tsx-are-correctly-structured-without-circular-dependencies",
+      "featureTitle": "Ensure all component imports and routing configuration in App.tsx and main.tsx are correctly structured without circular dependencies",
       "files": [
-        "frontend/src/pages/Chat.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/utils/urlParams.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -37,15 +82,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-76"
+        "REQ-121"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-social-media-link-input-field-in-the-chat-page-frontend-src-pages-chat-tsx-that-accepts-urls-and-sends-them-as-socialmedialink-messages-with-basic-url-validation",
-      "featureTitle": "Add a social media link input field in the Chat page (frontend/src/pages/Chat.tsx) that accepts URLs and sends them as socialMediaLink messages with basic URL validation",
+      "featureId": "feature-run-the-complete-build-and-deployment-process-end-to-end-to-verify-all-errors-are-resolved-and-the-application-deploys-successfully",
+      "featureTitle": "Run the complete build and deployment process end-to-end to verify all errors are resolved and the application deploys successfully",
       "files": [
-        "frontend/src/pages/Chat.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -57,67 +103,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-77"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-message-display-logic-in-chat-tsx-to-render-grocery-list-messages-as-formatted-lists-with-checkboxes-or-bullet-points-showing-all-items-in-the-groceryitems-array",
-      "featureTitle": "Update the message display logic in Chat.tsx to render grocery list messages as formatted lists with checkboxes or bullet points showing all items in the groceryItems array",
-      "files": [
-        "frontend/src/pages/Chat.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-78"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-message-display-logic-in-chat-tsx-to-render-social-media-link-messages-with-link-preview-cards-showing-the-url-as-a-clickable-hyperlink-that-opens-in-a-new-tab",
-      "featureTitle": "Update the message display logic in Chat.tsx to render social media link messages with link preview cards showing the URL as a clickable hyperlink that opens in a new tab",
-      "files": [
-        "frontend/src/pages/Chat.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-79"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-message-type-selector-or-toggle-buttons-in-the-chat-page-ui-that-allows-users-to-switch-between-sending-regular-text-messages-grocery-lists-and-social-media-links",
-      "featureTitle": "Add a message type selector or toggle buttons in the Chat page UI that allows users to switch between sending regular text messages, grocery lists, and social media links",
-      "files": [
-        "frontend/src/pages/Chat.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-80"
+        "REQ-122"
       ],
       "confidence": "high"
     }

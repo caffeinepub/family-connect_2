@@ -1,4 +1,4 @@
-import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
+import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet, useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile, useCreateProfile, useValidateFamilyInvitation } from './hooks/useQueries';
 import { useState, useEffect } from 'react';
@@ -6,8 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from './components/ui/input';
 import { Button } from './components/ui/button';
 import { Label } from './components/ui/label';
-import { RadioGroup, RadioGroupItem } from './components/ui/radio-group';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UserCircle, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -18,12 +17,16 @@ import Chat from './pages/Chat';
 import EducationalHub from './pages/EducationalHub';
 import Settings from './pages/Settings';
 import { Role } from './backend';
+import { getInvitationTokenFromURL, clearInvitationTokenFromURL } from './utils/urlParams';
+import { useOnboarding } from './hooks/useOnboarding';
 
 function ProfileSetupModal() {
+  const navigate = useNavigate();
   const { identity } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
   const createProfile = useCreateProfile();
   const validateInvitation = useValidateFamilyInvitation();
+  const { markStepComplete, shouldShowGuidance } = useOnboarding();
 
   const [displayName, setDisplayName] = useState('');
   const [selectedRole, setSelectedRole] = useState<'parent' | 'child'>('parent');
@@ -31,53 +34,43 @@ function ProfileSetupModal() {
 
   const isAuthenticated = !!identity;
 
-  // Check for invitation token in URL
+  // Auto-detect and process invitation token from URL
   useEffect(() => {
-    const checkInvitationToken = async () => {
-      if (!isAuthenticated || !identity) return;
+    const processInvitationToken = async () => {
+      if (!isAuthenticated || !identity || isProcessingInvite) return;
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const inviteToken = urlParams.get('invite');
+      const inviteToken = getInvitationTokenFromURL();
 
-      if (inviteToken && !isProcessingInvite) {
+      if (inviteToken) {
         setIsProcessingInvite(true);
-        console.log('🎟️ Found invitation token in URL:', inviteToken);
+        console.log('🎟️ Auto-processing invitation token:', inviteToken);
 
         try {
           const childPrincipal = identity.getPrincipal();
           const parentPrincipal = await validateInvitation.mutateAsync({
             token: inviteToken,
-            childPrincipal,
+            child: childPrincipal,
           });
 
-          toast.success('Successfully connected to family!');
+          toast.success('🎉 Successfully connected to your family!');
           console.log('✅ Connected to parent:', parentPrincipal.toString());
-
-          // Clear the invite parameter from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          markStepComplete('firstFamilyConnection');
+          clearInvitationTokenFromURL();
         } catch (error: any) {
           console.error('❌ Failed to validate invitation:', error);
-          toast.error(error.message || 'Failed to validate invitation link');
+          toast.error(error.message || 'Failed to join family. Please try again.');
+          clearInvitationTokenFromURL();
         } finally {
           setIsProcessingInvite(false);
         }
       }
     };
 
-    checkInvitationToken();
-  }, [isAuthenticated, identity, validateInvitation, isProcessingInvite]);
+    processInvitationToken();
+  }, [isAuthenticated, identity, validateInvitation, isProcessingInvite, markStepComplete]);
 
   const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
-
-  console.log('🔍 [ProfileSetupModal] Render state:', {
-    isAuthenticated,
-    profileLoading,
-    isFetched,
-    userProfile,
-    showProfileSetup,
-    userProfileIsNull: userProfile === null,
-    userProfileIsUndefined: userProfile === undefined,
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,35 +80,42 @@ function ProfileSetupModal() {
     }
 
     try {
-      console.log('📝 [ProfileSetupModal] Submitting profile setup with role:', selectedRole);
+      console.log('📝 Creating profile with role:', selectedRole);
       const roleEnum: Role = selectedRole === 'parent' ? Role.parent : Role.child;
-      console.log('📝 [ProfileSetupModal] Role enum created:', roleEnum);
       
       await createProfile.mutateAsync({
         displayName: displayName.trim(),
         role: roleEnum,
       });
       
-      console.log('✅ [ProfileSetupModal] Profile created successfully');
-      toast.success('Profile created successfully!');
+      console.log('✅ Profile created successfully');
+      toast.success('Welcome to FamilyConnect! 🎉');
+      markStepComplete('roleSelection');
+      
+      // Navigate to dashboard after successful profile creation
+      setTimeout(() => {
+        navigate({ to: '/' });
+      }, 100);
     } catch (error: any) {
-      console.error('❌ [ProfileSetupModal] Profile creation failed:', error);
+      console.error('❌ Profile creation failed:', error);
       toast.error(error.message || 'Failed to create profile');
     }
   };
 
+  const showRoleGuidance = shouldShowGuidance('roleSelection');
+
   return (
     <Dialog open={showProfileSetup}>
-      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-lg" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Welcome to FamilyConnect!</DialogTitle>
-          <DialogDescription>
-            Let's set up your profile to get started.
+          <DialogTitle className="text-2xl">Welcome to FamilyConnect! 👋</DialogTitle>
+          <DialogDescription className="text-base">
+            Let's get you started in just two quick steps.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="displayName">Your Name</Label>
+            <Label htmlFor="displayName" className="text-base font-medium">What's your name?</Label>
             <Input
               id="displayName"
               placeholder="Enter your name"
@@ -123,37 +123,67 @@ function ProfileSetupModal() {
               onChange={(e) => setDisplayName(e.target.value)}
               disabled={createProfile.isPending}
               autoFocus
+              className="text-base py-5"
             />
           </div>
-          <div className="space-y-2">
-            <Label>Your Role</Label>
-            <RadioGroup
-              value={selectedRole}
-              onValueChange={(value) => setSelectedRole(value as 'parent' | 'child')}
-              disabled={createProfile.isPending}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="parent" id="parent" />
-                <Label htmlFor="parent" className="font-normal cursor-pointer">
-                  Parent
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="child" id="child" />
-                <Label htmlFor="child" className="font-normal cursor-pointer">
-                  Child
-                </Label>
-              </div>
-            </RadioGroup>
+          
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Choose your role</Label>
+            {showRoleGuidance && (
+              <p className="text-sm text-muted-foreground">
+                Select whether you're a parent managing the family or a child joining your family.
+              </p>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setSelectedRole('parent')}
+                disabled={createProfile.isPending}
+                className={`flex flex-col items-center gap-3 p-6 rounded-lg border-2 transition-all ${
+                  selectedRole === 'parent'
+                    ? 'border-warm-500 bg-warm-50 dark:bg-warm-900/30'
+                    : 'border-warm-200 hover:border-warm-300 dark:border-warm-700'
+                } ${createProfile.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <Users className={`h-10 w-10 ${selectedRole === 'parent' ? 'text-warm-600' : 'text-warm-400'}`} />
+                <div className="text-center">
+                  <div className="font-semibold text-base">Parent</div>
+                  <div className="text-xs text-muted-foreground mt-1">Manage family</div>
+                </div>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setSelectedRole('child')}
+                disabled={createProfile.isPending}
+                className={`flex flex-col items-center gap-3 p-6 rounded-lg border-2 transition-all ${
+                  selectedRole === 'child'
+                    ? 'border-warm-500 bg-warm-50 dark:bg-warm-900/30'
+                    : 'border-warm-200 hover:border-warm-300 dark:border-warm-700'
+                } ${createProfile.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <UserCircle className={`h-10 w-10 ${selectedRole === 'child' ? 'text-warm-600' : 'text-warm-400'}`} />
+                <div className="text-center">
+                  <div className="font-semibold text-base">Child</div>
+                  <div className="text-xs text-muted-foreground mt-1">Join family</div>
+                </div>
+              </button>
+            </div>
           </div>
-          <Button type="submit" disabled={createProfile.isPending} className="w-full">
+          
+          <Button 
+            type="submit" 
+            disabled={createProfile.isPending} 
+            className="w-full py-6 text-base bg-warm-500 hover:bg-warm-600"
+            size="lg"
+          >
             {createProfile.isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Profile...
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Creating Your Profile...
               </>
             ) : (
-              'Create Profile'
+              'Get Started'
             )}
           </Button>
         </form>
