@@ -1,0 +1,520 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 15,
+  "summary": "Family communication app with AI-powered question paper analysis, sentiment-based happiness meter, problem-solving tracking, family guidance with professional tone, permission management for children, and fight/conflict resolution tracking",
+  "architectural_notes": [
+    "App requires real-time updates for location sharing and messaging",
+    "Consider family-based user groups/circles for privacy",
+    "Dashboard should aggregate multiple content types (status, photos, reminders)",
+    "AI integration required for text analysis and educational content processing",
+    "Sentiment analysis needed for happiness meter feature",
+    "Professional tone enforcement layer for AI responses",
+    "File upload system needed for question papers and answer scripts",
+    "User role system required (parent vs child) set at login or registration",
+    "Permission request workflow: child submits → parent reviews → approve/deny",
+    "AI must analyze chat messages to detect conflict patterns and resolution indicators"
+  ],
+  "known_issues": [
+    "Permission widget and parent/child role selection not visible or accessible in current deployment",
+    "Role selection modal (parent/child options) not displaying on login in Version 6"
+  ],
+  "isFixRequest": true,
+  "generatedImages": [
+    {
+      "filename": "Generated Image February 23, 2026 - 12:21PM.png",
+      "description": "Family app dashboard interface"
+    }
+  ],
+  "existing_features": [
+    {
+      "id": "feature-create-a-main-dashboard-feed-that-displays-family-updates-in-chronological-order-with-the-ability-to-post-new-updates",
+      "title": "Create a main dashboard/feed that displays family updates in chronological order with the ability to post new updates",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-photo-and-video-sharing-capability-to-allow-family-members-to-upload-and-view-media-in-the-feed",
+      "title": "Add photo and video sharing capability to allow family members to upload and view media in the feed",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-important-reminders-feature-allowing-family-members-to-post-and-view-time-sensitive-notifications",
+      "title": "Create important reminders feature allowing family members to post and view time-sensitive notifications",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-location-sharing-functionality-allowing-family-members-to-share-and-view-each-other-s-current-locations",
+      "title": "Implement location sharing functionality allowing family members to share and view each other's current locations",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-chat-messaging-function-for-family-members-to-communicate-directly",
+      "title": "Build chat/messaging function for family members to communicate directly",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-and-implement-a-warm-family-friendly-visual-theme-with-inviting-colors-and-clear-typography-that-feels-personal-and-approachable-enforced-consistently-across-all-screens",
+      "title": "Design and implement a warm, family-friendly visual theme with inviting colors and clear typography that feels personal and approachable, enforced consistently across all screens",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-happiness-meter-feature-that-analyzes-family-text-communications-updates-messages-reminders-to-calculate-and-display-an-aggregate-family-happiness-score",
+      "title": "Create happiness meter feature that analyzes family text communications (updates, messages, reminders) to calculate and display an aggregate family happiness score",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-widget-displaying-the-total-number-of-problems-solved-through-ai-assistance-incrementing-when-users-mark-doubts-as-resolved-or-accept-ai-remedies",
+      "title": "Implement widget displaying the total number of problems solved through AI assistance, incrementing when users mark doubts as resolved or accept AI remedies",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-interface-for-uploading-question-papers-and-answer-scripts-with-file-selection-upload-progress-and-confirmation",
+      "title": "Create frontend interface for uploading question papers and answer scripts with file selection, upload progress, and confirmation",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-frontend-page-displaying-ai-analysis-results-tips-and-tricks-and-doubt-clearing-interface-with-parliamentary-style-responses",
+      "title": "Build frontend page displaying AI analysis results, tips and tricks, and doubt clearing interface with parliamentary-style responses",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-happiness-meter-visualization-and-problems-solved-widget-into-the-dashboard-or-navigation-area-for-constant-family-awareness",
+      "title": "Integrate happiness meter visualization and problems solved widget into the dashboard or navigation area for constant family awareness",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-generic-family-connect-branding-throughout-the-application-with-a-distinctive-memorable-app-name-that-reflects-the-family-communication-and-educational-support-features",
+      "title": "Replace the generic 'Family Connect' branding throughout the application with a distinctive, memorable app name that reflects the family communication and educational support features",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-generated-custom-app-logo-as-a-static-asset-in-the-application-header-replacing-or-complementing-the-current-branding",
+      "title": "Display the generated custom app logo as a static asset in the application header, replacing or complementing the current branding",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-login-prompt-the-user-to-select-whether-they-are-a-parent-or-a-child-and-store-this-role-selection-in-the-user-profile",
+      "title": "On login, prompt the user to select whether they are a parent or a child, and store this role selection in the user profile",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-permission-request-widget-for-children-to-request-permission-to-go-out-play-games-or-watch-youtube",
+      "title": "Create a permission request widget for children to request permission to go out, play games, or watch YouTube",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-permission-approval-interface-for-parents-to-review-and-grant-or-deny-permission-requests-from-children",
+      "title": "Create a permission approval interface for parents to review and grant or deny permission requests from children",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-optional-ai-chat-analysis-feature-in-parent-accounts-that-analyzes-family-chat-messages-to-detect-conflicts-and-provide-remedies-for-fights",
+      "title": "Add an optional AI chat analysis feature in parent accounts that analyzes family chat messages to detect conflicts and provide remedies for fights",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-fights-solved-counter-widget-for-parents-that-automatically-tracks-and-displays-the-number-of-resolved-family-conflicts-based-on-ai-chat-analysis",
+      "title": "Implement a 'Fights Solved' counter widget for parents that automatically tracks and displays the number of resolved family conflicts based on AI chat analysis",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-fights-created-counter-widget-for-parents-that-automatically-tracks-and-displays-the-number-of-family-conflicts-detected-by-ai-chat-analysis",
+      "title": "Implement a 'Fights Created' counter widget for parents that automatically tracks and displays the number of family conflicts detected by AI chat analysis",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enable-parents-to-manually-edit-both-the-fights-created-and-fights-solved-counter-values-through-an-edit-interface",
+      "title": "Enable parents to manually edit both the 'Fights Created' and 'Fights Solved' counter values through an edit interface",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-permission-request-widget-permissionrequestwidget-tsx-is-visible-and-accessible-to-users-with-child-role-on-the-dashboard-page",
+      "title": "Ensure the permission request widget (PermissionRequestWidget.tsx) is visible and accessible to users with 'child' role on the Dashboard page",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-permission-approval-interface-permissionapprovalinterface-tsx-is-visible-and-functional-for-users-with-parent-role-on-the-dashboard-page",
+      "title": "Ensure the permission approval interface (PermissionApprovalInterface.tsx) is visible and functional for users with 'parent' role on the Dashboard page",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-role-selection-modal-in-app-tsx-to-ensure-it-properly-displays-and-captures-user-role-parent-or-child-on-first-login-and-verify-the-selected-role-is-correctly-saved-to-the-user-profile",
+      "title": "Fix the role selection modal in App.tsx to ensure it properly displays and captures user role (parent or child) on first login, and verify the selected role is correctly saved to the user profile",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-console-logging-or-debugging-output-to-the-dashboard-page-to-help-identify-why-role-based-widgets-may-not-be-rendering-for-parent-and-child-users",
+      "title": "Add console logging or debugging output to the Dashboard page to help identify why role-based widgets may not be rendering for parent and child users",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-debug-and-fix-the-role-selection-modal-in-app-tsx-to-ensure-it-displays-on-first-login-when-user-profile-has-no-role-set-captures-the-user-s-selection-parent-or-child-and-successfully-saves-the-role-to-the-backend-via-updateuserprofile",
+      "title": "Debug and fix the role selection modal in App.tsx to ensure it displays on first login when user profile has no role set, captures the user's selection (parent or child), and successfully saves the role to the backend via updateUserProfile",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-dashboard-page-to-correctly-render-role-based-widgets-based-on-the-authenticated-user-s-role-permissionrequestwidget-for-children-and-permissionapprovalinterface-for-parents",
+      "title": "Fix the Dashboard page to correctly render role-based widgets based on the authenticated user's role: PermissionRequestWidget for children and PermissionApprovalInterface for parents",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-comprehensive-console-logging-throughout-the-permission-system-flow-including-role-selection-modal-state-userprofile-data-from-backend-role-based-conditional-rendering-decisions-in-dashboard-and-permission-widget-mount-unmount-events",
+      "title": "Add comprehensive console logging throughout the permission system flow including: role selection modal state, userProfile data from backend, role-based conditional rendering decisions in Dashboard, and permission widget mount/unmount events",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-debug-and-fix-the-profilesetupmodal-in-app-tsx-to-ensure-it-displays-immediately-when-a-user-logs-in-without-a-role-set-in-their-profile-and-verify-the-modal-properly-captures-the-user-s-role-selection-parent-or-child",
+      "title": "Debug and fix the ProfileSetupModal in App.tsx to ensure it displays immediately when a user logs in without a role set in their profile, and verify the modal properly captures the user's role selection (parent or child)",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-the-role-selection-state-management-in-app-tsx-correctly-detects-when-userprofile-is-loaded-from-the-backend-and-the-role-field-is-undefined-then-triggers-the-modal-to-open",
+      "title": "Verify the role selection state management in App.tsx correctly detects when userProfile is loaded from the backend and the role field is undefined, then triggers the modal to open",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-updateuserprofile-mutation-in-app-tsx-successfully-saves-the-selected-role-to-the-backend-and-refetches-the-user-profile-to-reflect-the-updated-role",
+      "title": "Ensure the updateUserProfile mutation in App.tsx successfully saves the selected role to the backend and refetches the user profile to reflect the updated role",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-enhanced-debug-logging-to-profilesetupmodal-component-lifecycle-to-trace-modal-render-state-visibility-conditions-user-profile-data-and-role-selection-flow",
+      "title": "Add enhanced debug logging to ProfileSetupModal component lifecycle to trace modal render state, visibility conditions, user profile data, and role selection flow",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Main feed/dashboard for family updates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Location sharing functionality",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Chat/messaging function",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Status updates feature",
+      "reqIds": [
+        "AR-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Photo and video sharing",
+      "reqIds": [
+        "AR-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Important reminders/notifications",
+      "reqIds": [
+        "AR-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Implement status update functionality allowing family members to post text-based status messages",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Display the generated dashboard interface image as a static asset in the application",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "AI feature for uploading and analyzing question papers and answer scripts with tips and tricks",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "AI doubt clearing functionality to answer user questions",
+      "reqIds": [
+        "AR-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Happiness meter that analyzes family text communication to show family sentiment",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Widget showing number of problems solved",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "AI-powered remedies and solutions for family problems",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Configure AI to use professional/parliamentary language only",
+      "reqIds": [
+        "AR-15",
+        "AR-16",
+        "AR-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Create backend endpoint for uploading question papers and answer scripts as file attachments, storing them securely with metadata (uploader ID, timestamp, file type)",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Implement AI analysis functionality that processes uploaded question papers and answer scripts to generate study tips, tricks, and performance insights using parliamentary/professional language only",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Build AI-powered doubt clearing system where users can ask questions related to uploaded materials and receive professional, parliamentary-style responses",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Build AI remedy system that analyzes identified problems from question analysis or user queries and provides actionable solutions using parliamentary language",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Create custom app name/branding",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Design and implement custom app logo",
+      "reqIds": [
+        "AR-27"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "User role selection on login (parent or child)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Permission request system for children to ask permission to go out, play games, or watch YouTube",
+      "reqIds": [
+        "AR-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Permission granting interface for parents to approve or deny child requests",
+      "reqIds": [
+        "AR-29",
+        "AR-30"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "AI chat analysis for detecting family fights/conflicts in parent accounts",
+      "reqIds": [
+        "AR-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Optional AI remedies/solutions for detected family fights",
+      "reqIds": [
+        "AR-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Fights solved counter widget for parents that auto-updates based on chat analysis",
+      "reqIds": [
+        "AR-29",
+        "AR-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Fights created counter widget for parents that auto-updates based on chat analysis",
+      "reqIds": [
+        "AR-29",
+        "AR-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Manual edit capability for parents to adjust fights created and solved counts",
+      "reqIds": [
+        "AR-29",
+        "AR-34",
+        "AR-35"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Verify the backend getUserProfile and updateUserProfile methods in main.mo correctly handle the optional Role field and return role data to the frontend",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Verify the backend getUserProfile endpoint in main.mo returns the complete UserProfile object including the role field when queried by the frontend",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Verify the backend getUserProfile method in main.mo correctly returns the complete UserProfile object including the role field for authenticated users",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Family Connect",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

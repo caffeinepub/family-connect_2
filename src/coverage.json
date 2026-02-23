@@ -1,0 +1,89 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-23T08:34:31.857Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 5,
+    "implemented": 4,
+    "items": [
+      {
+        "id": "REQ-36",
+        "summary": "Debug and fix the ProfileSetupModal in App.tsx to ensure it displays immediately when a user logs in without a role set in their profile, and verify the modal properly captures the user's role selection (parent or child)",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-37",
+        "summary": "Verify the role selection state management in App.tsx correctly detects when userProfile is loaded from the backend and the role field is undefined, then triggers the modal to open",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-38",
+        "summary": "Ensure the updateUserProfile mutation in App.tsx successfully saves the selected role to the backend and refetches the user profile to reflect the updated role",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-39",
+        "summary": "Add enhanced debug logging to ProfileSetupModal component lifecycle to trace modal render state, visibility conditions, user profile data, and role selection flow",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-40",
+        "summary": "Verify the backend getUserProfile method in main.mo correctly returns the complete UserProfile object including the role field for authenticated users",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/HappinessMeter.tsx",
+    "frontend/src/components/PermissionRequestWidget.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/Chat.tsx",
+    "frontend/src/pages/EducationalHub.tsx",
+    "frontend/src/pages/LocationSharing.tsx",
+    "frontend/src/pages/Reminders.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

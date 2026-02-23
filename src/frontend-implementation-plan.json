@@ -1,0 +1,87 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix role selection modal not displaying on login",
+  "requirements": [
+    {
+      "id": "REQ-36",
+      "summary": "Debug and fix the ProfileSetupModal in App.tsx to ensure it displays immediately when a user logs in without a role set in their profile, and verify the modal properly captures the user's role selection (parent or child)",
+      "acceptanceCriteria": [
+        "Modal appears automatically on login when userProfile.role is undefined or null",
+        "Modal displays both 'Parent' and 'Child' radio button options clearly",
+        "User can select either parent or child role",
+        "Modal does not close until a valid role is selected and saved"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Fix the ProfileSetupModal visibility logic to properly detect when userProfile.role is undefined or null. Ensure the modal condition checks for both missing role and completed profile fetch. Update the modal UI to display radio button options for Parent and Child roles clearly. Prevent modal dismissal until a role is selected and saved successfully. Verify the component's usage instructions for the authorization component before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "summary": "Verify the role selection state management in App.tsx correctly detects when userProfile is loaded from the backend and the role field is undefined, then triggers the modal to open",
+      "acceptanceCriteria": [
+        "Console logs show userProfile data structure when fetched from backend",
+        "Console logs confirm when role is undefined and modal should open",
+        "Modal open state is set to true when conditions are met",
+        "No race conditions prevent modal from appearing"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add comprehensive console logging to trace userProfile data when fetched from backend. Log the complete userProfile object structure including the role field value. Add conditional logging that confirms when role is undefined/null and the modal should open. Log the modal open state changes to verify proper state management. Ensure logging captures the timing of profile fetch completion to detect race conditions."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add debug logging to the useGetCallerUserProfile hook to trace when the query is enabled, when it starts fetching, and when it completes. Log the returned userProfile data structure with emphasis on the role field. Ensure the hook properly exposes isFetched state to prevent premature modal display checks."
+        }
+      ]
+    },
+    {
+      "id": "REQ-38",
+      "summary": "Ensure the updateUserProfile mutation in App.tsx successfully saves the selected role to the backend and refetches the user profile to reflect the updated role",
+      "acceptanceCriteria": [
+        "Selected role (parent or child) is passed to updateUserProfile mutation",
+        "Backend updateUserProfile method receives and saves the role",
+        "Success callback refetches user profile query",
+        "Updated userProfile includes the newly saved role",
+        "Console logs confirm successful role save operation"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Verify the ProfileSetupModal handleRoleSelect function correctly constructs the updated userProfile object with the selected role (Parent or Child enum value). Ensure the mutation calls saveCallerUserProfile with the complete profile including the new role. Add success callback that invalidates and refetches the currentUserProfile query. Add console logging to confirm the role value being saved and the success response. Verify that the modal closes only after successful profile update."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add debug logging to the useSaveCallerUserProfile mutation hook to trace when the mutation is called, what profile data is being sent (including role field), and when it completes successfully or fails. Log the mutation response and any errors. Ensure the mutation properly triggers query invalidation for currentUserProfile after success."
+        }
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "summary": "Add enhanced debug logging to ProfileSetupModal component lifecycle to trace modal render state, visibility conditions, user profile data, and role selection flow",
+      "acceptanceCriteria": [
+        "Log when ProfileSetupModal component mounts and unmounts",
+        "Log the current value of isOpen state whenever it changes",
+        "Log userProfile data when it updates, highlighting the role field",
+        "Log when role selection buttons are clicked and what value is selected",
+        "Log when handleRoleSelect is called and the mutation is triggered"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add useEffect hook to ProfileSetupModal (or the section of App.tsx where the modal is defined) to log component mount and unmount lifecycle events. Add logging for isOpen state changes using useEffect with isOpen as dependency. Add logging when userProfile prop updates, with detailed output of the role field value. Add console logs inside role selection button onClick handlers to trace which role is clicked. Add logging at the start of handleRoleSelect function to confirm when mutation is triggered and with what data."
+        }
+      ]
+    }
+  ]
+}
